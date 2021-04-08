@@ -12,22 +12,22 @@
 
 # theme                  : "minimal-mistakes-jekyll"
 # remote_theme           : "mmistakes/minimal-mistakes"
-minimal_mistakes_skin    : "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+minimal_mistakes_skin    : "dark" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
 # Site Settings
-locale                   : "en-US"
-title                    : "Site Title"
-title_separator          : "-"
-subtitle                 : # site tagline that appears below site title in masthead
-name                     : "Your Name"
-description              : "An amazing website."
-url                      : # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+locale                   : "ko-KR"
+title                    : "JihwanKim Develop Blog"
+title_separator          : "&#124"
+subtitle                 : "Version 1.0" # site tagline that appears below site title in masthead
+name                     : "Jihwan Kim"
+description              : "백엔드 개발자이며, 취미로 플러터, 유니티를 만지는 개발자"
+url                      : "https://JihwanKim.github.io" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
-repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
+repository               : "JihwanKim/JihwanKim.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 logo                     : # path of logo image to display in the masthead, e.g. "/assets/images/88x88.png"
-masthead_title           : # overrides the website title displayed in the masthead, use " " for no title
-# breadcrumbs            : false # true, false (default)
+masthead_title           : "즐기는 개발자" # overrides the website title displayed in the masthead, use " " for no title
+breadcrumbs              : true # true, false (default)
 words_per_minute         : 200
 comments:
   provider               : # false (default), "disqus", "discourse", "facebook", "staticman", "staticman_v2", "utterances", "custom"
@@ -94,15 +94,15 @@ analytics:
 
 # Site Author
 author:
-  name             : "Your Name"
+  name             : "Jihwan Kim"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "I am an **amazing** person."
-  location         : "Somewhere"
-  email            :
+  bio              : "고민이 생기고 해당 고민에 대해 어떤 결과를 도출해내는지 써내려가는 블로그입니다.<br/>여러가지 의견은 언제나 환영입니다!"
+  location         : "Republic Of Korea. Daejeon"
+  email            : "jihwan.dev@gmail.com"
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
-      # url: "mailto:your.name@email.com"
+      url: "mailto:jihwan.dev@gmail.com"
     - label: "Website"
       icon: "fas fa-fw fa-link"
       # url: "https://your-website.com"
@@ -114,7 +114,7 @@ author:
       # url: "https://facebook.com/"
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
-      # url: "https://github.com/"
+      url: "https://github.com/"
     - label: "Instagram"
       icon: "fab fa-fw fa-instagram"
       # url: "https://instagram.com/"

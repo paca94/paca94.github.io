@@ -1,0 +1,17 @@
+I"<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">모이고 푸시 스로틀링을 통한 TOPIC_RATE_EXCEDDED 에러 방지</span>
+</code></pre></div></div>
+
+<p>참고 링크&lt;/br&gt;
+<strong>https://firebase.google.com/docs/cloud-messaging/concept-options#fanout_throttling</strong></p>
+
+<p>FCM 전송 실패 에러중 TOPIC_RATE_EXCEDDED가 있는데, 푸시를 너무 빨리, 그리고 자주 보내서 발생하는 오류다.</p>
+
+<p>FCM의 클라이언트 수신 가능한 최대 개수가 분당 240개. 시간당 5000개까지 제한하고 있다. 
+아무리 빨라도 분당 240개를 잡고 계산했을 때, 0.25초당 1개의 푸시만 클라이언트에 전송되어야 한다.
+물론, 더 적게 보내게끔 추후 개선해야 한다.</p>
+
+<p>따라서, 최근에 해당 부분에 대해서 작업하여, 0.25초마다 한번씩만 푸시를 하도록 하였다.
+여러개의 푸시가 한번에 몰려도 토픽당 1초에 최대 4번까지만 전송한다는 이야기다.</p>
+
+<p>각 토픽마다 gen_server를 global로 띄운후에, 요청 function 을 호출하면, 띄워진 토픽에 해당하는 gen_server로 푸시요청이 넘겨지고, 매 0.25초 마다 한번씩 해당 푸시를 전송하도록 하였다.</p>
+:ET
