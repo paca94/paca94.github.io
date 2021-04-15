@@ -13,7 +13,7 @@ var store = [{
       },{
         "title": "Twinny Helper 앱 제작기",
         "excerpt":"사내 비즈박스 도입에 따른, TwinnyHelper 앱 제작기 총 개발 소요시간 : 약 20시간 올해 초, 사내 그룹웨어가 도입되었다. 도입된 그룹웨어는 비즈박스고, 해당 그룹웨어를 통해서 출퇴근기록, 휴가신청, 회의실예약 등이 가능하다. 이전에, slack을 이용해서, 출근 기록을 기록하고, 해당 기록을 기반으로 회사 식대를 계산하는 Bot을 만들어서 사용했었는데, 해당 비즈박스의 API들을 사용하여, Bot의 기능을...","categories": ["Flutter"],
-        "tags": [],
+        "tags": ["Flutter"],
         "url": "/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0/",
         "teaser": null
       },{

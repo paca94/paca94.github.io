@@ -4,6 +4,22 @@ search: true
 categories:
   - Flutter
 last_modified_at: 2021-04-10T08:06:00-05:00
+layout: single
+author_profile: true
+read_time: true
+comments: true
+share: true
+related: true
+tag:
+- Flutter
+description: 사내 비즈박스 도입에 따른, TwinnyHelper 앱 제작기
+article_tag1: 플러터
+article_section: Flutter
+meta_keywords: Flutter
+toc: true
+toc_sticky: true
+toc_label: 목차
+popular: true
 ---
 
 ```yaml
