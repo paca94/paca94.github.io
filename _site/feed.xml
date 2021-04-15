@@ -1,4 +1,195 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://jihwankim.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://jihwankim.github.io/" rel="alternate" type="text/html" /><updated>2021-04-10T07:27:01+09:00</updated><id>https://jihwankim.github.io/feed.xml</id><title type="html">JihwanKim Develop Blog</title><subtitle>백엔드 개발자이며, 취미로 플러터, 유니티를 만지는 개발자</subtitle><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><entry><title type="html">Twinny Helper 앱 제작기</title><link href="https://jihwankim.github.io/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0/" rel="alternate" type="text/html" title="Twinny Helper 앱 제작기" /><published>2021-04-10T00:00:00+09:00</published><updated>2021-04-10T22:06:00+09:00</updated><id>https://jihwankim.github.io/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0</id><content type="html" xml:base="https://jihwankim.github.io/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;사내 비즈박스 도입에 따른, TwinnyHelper 앱 제작기&lt;/span&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://jihwankim.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://jihwankim.github.io/" rel="alternate" type="text/html" /><updated>2021-04-15T21:04:11+09:00</updated><id>https://jihwankim.github.io/feed.xml</id><title type="html">JihwanKim Develop Blog</title><subtitle>백엔드 개발자이며, 취미로 플러터, 유니티를 만지는 개발자</subtitle><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><entry><title type="html">Auth와 User 분리</title><link href="https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/" rel="alternate" type="text/html" title="Auth와 User 분리" /><published>2021-04-15T00:00:00+09:00</published><updated>2021-04-10T22:06:00+09:00</updated><id>https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC</id><content type="html" xml:base="https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;하나의 유저 계정에 여러 로그인 방법 추가 설계 고민&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;요즘은 OAuth2를 이용하여 회원가입/로그인하는 서비스들이 매우 많아졌다.&lt;br /&gt;
+해당 방법으로 로그인을 하다 보면, 동일한 계정에 대해 구글계정으로 로그인 등 여러가지 추가 로그인 방법이 있으면 좋겠다고 생각이 들 때가 있고, 기존에 사용하던 연동된 계정을 사용하지 않게 되는 경우도 발생한다.&lt;br /&gt;
+따라서, 하나의 유저 계정에 여러개의 인증 방법으로 로그인 할 수 있는 방법에 대해 고민해보았고, 어떻게 해야할 지에 대해 기록한다.&lt;/p&gt;
+
+&lt;p&gt;내가 지금까지 만들었던 DB의 대부분은 유저정보가 곧 로그인 정보와 동일하였다.&lt;br /&gt;
+만약, 로그인을 이메일(아이디)/비밀번호로 사용하다가 OAuth2와 같은 로그인 방법이 추가되면, 테이블 구조와 코드가 더러워졌었다.&lt;br /&gt;
+하지만, 해당 방법 말고 유저 테이블과 로그인에 필요한 인증 테이블을 다르게 가지고 간다면, 해당 문제가 발생하지 않겠다라고 생각이 들었다.&lt;/p&gt;
+
+&lt;p&gt;해당 방법은 이전에 회사에서 퇴사하신 분과 토이프로젝트 작업을 할 때, 고민하다가 적용하였었다.&lt;br /&gt;
+테이블 구조는 아래와 같이 가진다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../../../assets/image/auth_user_seperate/table_structure.png&quot; alt=&quot;table_structure&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;위 이미지는 대략적으로 이런식으로 구현할 거라는 것만 그렸다.&lt;br /&gt;
+만약, 제공자가 구글인 인증방법이 추가된다면, 테이블을 하나 추가 시키면 된다.&lt;br /&gt;
+그리고 로그인 시, 입력되는 type에 따라, 인증방법을 달리하면 된다.&lt;/p&gt;
+
+&lt;p&gt;만약, 회원가입/로그인/인증코드 추가 Erlang 코드상에서 나타낸다면, 아래와 같은 코드가 나올 것이다.&lt;br /&gt;
+단, 예제를 위해 작성 하였고, 에러에 대한 대비 코드는 추가하지 않았다. 실제 코드를 실행해보지 않았다.&lt;br /&gt;
+실제로 작업한다면, 함수합성을 사용할 것이다.&lt;/p&gt;
+&lt;h3 id=&quot;autherl&quot;&gt;auth.erl&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;language-Erlang&quot;&gt;  ...
+  -export_all().
+
+  -spec sign_up(bitstring(), types:auth_type(), map()) -&amp;gt; 
+    {ok, map()} 
+    | {error, already_exist_auth_for_email}
+    | {error, already_use_email}.
+  sign_up(Name, Type, AuthData)-&amp;gt;
+    {ok, UserInfo} = model_user:insert(Name),
+    {ok, AuthModule} = auth_plugin_utils:type_to_auth_module(Type),
+
+    {ok, _} = AuthModule:new(UserInfo, AuthData),
+    {ok, UserInfo}.
+
+  -spec sign_in(types:auth_type(), map())-&amp;gt;
+    {ok, map()}
+    | {erorr, invalid_auth_info}.
+  sign_in(Type, AuthData)-&amp;gt;
+    {ok, AuthModule} = auth_plugin_utils:type_to_auth_module(Type),
+    case
+      AuthModule:get(Type, AuthData)
+    of
+      {ok, UserIdx}-&amp;gt;
+        {ok, UserInfo} = model_user:get_by_user_idx(UserIdx),
+        {ok, UserInfo};
+      {error, _} = Err-&amp;gt;
+        Err
+    end.
+  
+  -spec add_auth(pos_integer(), types:auth_type(), map())-&amp;gt;
+    ok
+    | {error, already_exist_auth_for_email}
+    | {error, already_use_email}.
+  add_auth(UserIdx, Type, AuthData)-&amp;gt;
+    {ok, UserInfo} = model_user:get_by_user_idx(UesrIdx),
+    {ok, AuthModule} = auth_plugin_utils:type_to_auth_module(Type),
+
+    case
+      AuthModule:new(UserInfo, AuthData)
+    of
+      {ok, _} -&amp;gt;
+        ok;
+      {error, _} = Err-&amp;gt;
+        Err
+    end.
+
+    -spec withdraw(pos_integer()) -&amp;gt; ok.
+    withdraw(UserIdx)-&amp;gt;
+      {ok, UserInfo} = model_user:get_by_user_idx(UesrIdx),
+        [
+          AuthModule:remove(UserInfo)
+          || AuthModule &amp;lt;- auth_plugin:get_all_auth_modules()],
+      model_user:delete_by_user_idx(UserIdx),
+      ok.
+
+  %%%
+  %%% Internal Function
+  %%%
+
+  ...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;auth_plugin_for_emailerl&quot;&gt;auth_plugin_for_email.erl&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;language-Erlang&quot;&gt;
+  -behavior(auth_plugin).
+  -export_all().
+  
+  -spec new(UserInfo :: map(), AuthData :: map()) -&amp;gt; 
+    {ok, map()}
+    | {error, already_exist_auth_for_email}
+    | {error, already_use_email}.
+  new(#{uesr_idx := UesrIdx} = UserInfo, #{email := Email, password := Password} = _AuthData)-&amp;gt;
+    IsAlreadyHasAuth = 
+      case
+        model_auth_for_email:get_by_user_idx(UserIdx)
+      of
+        {ok, _}-&amp;gt;
+          true;
+        {error, _}-&amp;gt;
+          false
+      end,
+    
+    IsAlreadyUseEmail = 
+      case
+        model_auth_for_email:get_by_email(Email)
+      of
+        {ok, _}-&amp;gt;
+          true;
+        {error, _}-&amp;gt;
+          false
+      end,
+      
+    case
+      {
+        IsAlreadyHasAuth
+        , IsAlreadyUseEmail
+      }
+    of
+      {true, _} -&amp;gt;
+        {error, already_exist_auth_for_email};
+      {_, true} -&amp;gt;
+        {error, already_use_email};
+      {false, false} -&amp;gt;
+        % 패스워드 암호화 과정 코드가 포함되어야 하지만, 여기에는 포함하지 않음.
+        model_auth_for_email:insert(UserIdx, Email, Password)
+    end.
+
+  -spec get(AuthData :: map()) -&amp;gt; 
+    {ok, pos_integer()}
+    | {error, invalid_auth_info}.
+  get(#{email := Email, password := Password} = _AuthData) -&amp;gt;
+    case
+      model_auth_for_email:get_by_email(Email)
+    of
+      {ok, AuthInfo} -&amp;gt;
+        case
+          maps:get(password, AuthInfo)
+        of
+          Password -&amp;gt; 
+            {ok, maps:get(user_idx, AuthInfo)};
+          _ -&amp;gt;
+            {error, invalid_auth_info}
+        end;
+      {error, _} -&amp;gt;
+        {error, invalid_auth_info}
+    end.
+
+  -spec remove(UserInfo :: map()) -&amp;gt; 
+    {ok, any()}.
+  remove(#{user_idx := UserIdx} = _UserInfo) -&amp;gt;
+    model_auth_for_email:remove_by_user_idx(UserIdx).
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;auth_plugin_utilserl&quot;&gt;auth_plugin_utils.erl&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;language-Erlang&quot;&gt;  -export_all().
+
+  type_to_auth_module(email)-&amp;gt;
+    {ok, auth_plugin:auth_plugin_for_email()};
+  type_to_auth_module(Any)-&amp;gt;
+    io:format(&quot;{[ [~p:~p] invalid auth module! ~p ]} ~n&quot;, [?MODULE, ?FUNCTION_NAME, Any]),
+    {error, invalid_auth_module}.
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;auth_pluginerl&quot;&gt;auth_plugin.erl&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;language-Erlang&quot;&gt;  -export_all().
+
+  auth_plugin_for_email()-&amp;gt;
+    ?FUNCTION_NAME().
+
+  get_all_auth_modules()-&amp;gt;
+    [FunctionName || {FunctioName, _Arity}&amp;lt;- module_info(exports), FunctionName =/= module_info, FunctionName =/= get_all_auth_modules].
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;behavior는 Java로 치면 Interface같은 역할을 하는데, Erlang에서는 강제성을 띄지 않는다.&lt;br /&gt;
+위와 같은 방식을 사용하면, 새로운 로그인/회원가입 방법이 추가되면 아래 순서대로 진행하면 된다.&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;로그인/회원가입 방법에 맞는 테이블 추가&lt;/li&gt;
+  &lt;li&gt;로그인/회원가입 방법에 맞는 plugin 파일을 추가 ( ex : auth_plugin_for_kakao)&lt;/li&gt;
+  &lt;li&gt;auth_plugin.erl 파일로 가서 해당 모듈명에 해당하는 함수를 추가시킨다.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auth_plugin_utils.erl&lt;/code&gt;파일에서 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fun type_to_auth_module/1&lt;/code&gt;에 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kakao&lt;/code&gt;에 해당되는 패턴매칭을 추가시켜준다.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;만약, 특정 방법으로 추가적인 회원가입/로그인을 막게 되면, 해당 plugin 내부에서 new/get function의 return으로 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;{error, not_suppert}&lt;/code&gt; 정도만 주면 될것이라 생각된다.&lt;/p&gt;
+
+&lt;p&gt;실제, 해당 방법이 적용된 프로젝트는 서버는 TypeScript + Express + TypeORM를 사용하였고, 클라이언트는 Flutter를 통해 작성하였다.&lt;br /&gt;
+개인적으로 재밌었는데, 서로 바빠지게 되면서, 추가적인 하지 못하게 되어 안타까운 토이 프로젝트였다.&lt;br /&gt;
+해당 코드는 추후, 개인 Github를 통해서 올릴 예정이다.&lt;/p&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="Thinking" /><summary type="html">하나의 유저 계정에 여러 로그인 방법 추가 설계 고민</summary></entry><entry><title type="html">Twinny Helper 앱 제작기</title><link href="https://jihwankim.github.io/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0/" rel="alternate" type="text/html" title="Twinny Helper 앱 제작기" /><published>2021-04-10T00:00:00+09:00</published><updated>2021-04-10T22:06:00+09:00</updated><id>https://jihwankim.github.io/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0</id><content type="html" xml:base="https://jihwankim.github.io/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;사내 비즈박스 도입에 따른, TwinnyHelper 앱 제작기&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;총 개발 소요시간 : 약 20시간&lt;/strong&gt;&lt;/p&gt;

@@ -16,4 +16,10 @@ var store = [{
         "tags": [],
         "url": "/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0/",
         "teaser": null
+      },{
+        "title": "Auth와 User 분리",
+        "excerpt":"하나의 유저 계정에 여러 로그인 방법 추가 설계 고민 요즘은 OAuth2를 이용하여 회원가입/로그인하는 서비스들이 매우 많아졌다. 해당 방법으로 로그인을 하다 보면, 동일한 계정에 대해 구글계정으로 로그인 등 여러가지 추가 로그인 방법이 있으면 좋겠다고 생각이 들 때가 있고, 기존에 사용하던 연동된 계정을 사용하지 않게 되는 경우도 발생한다. 따라서, 하나의 유저 계정에...","categories": ["Thinking"],
+        "tags": [],
+        "url": "/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/",
+        "teaser": null
       }]
