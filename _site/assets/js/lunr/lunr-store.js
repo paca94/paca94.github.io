@@ -22,4 +22,10 @@ var store = [{
         "tags": [],
         "url": "/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/",
         "teaser": null
+      },{
+        "title": "Redis 장애",
+        "excerpt":"Redis 장애 대응 14일 오후 2시 36분 ~ 38분 사이에 서버에 장애가 발생했다. 장애 포인트는 AWS Elasticache Redis였고, 36분부터 문제가 생겨 38분에 복구되었다. 장애가 발생한 이유는 무엇이고, 어떻게 개선할 것인지에 대해 생각했던 것을 기록하는 글이다. 장애가 2분이나 유지된 이유 Redis 서비스에서 Primary 1대 Replica 1대를 사용하고 있는데, FailOver 설정을 해두지...","categories": ["MoiGo"],
+        "tags": ["MoiGo, Erlang, AWS, Redis"],
+        "url": "/moigo/Redis-%EC%9E%A5%EC%95%A0/",
+        "teaser": null
       }]

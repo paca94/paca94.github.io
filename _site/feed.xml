@@ -1,4 +1,64 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://jihwankim.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://jihwankim.github.io/" rel="alternate" type="text/html" /><updated>2021-04-15T21:33:15+09:00</updated><id>https://jihwankim.github.io/feed.xml</id><title type="html">JihwanKim Develop Blog</title><subtitle>백엔드 개발자이며, 취미로 플러터, 유니티를 만지는 개발자</subtitle><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><entry><title type="html">Auth와 User 분리</title><link href="https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/" rel="alternate" type="text/html" title="Auth와 User 분리" /><published>2021-04-15T00:00:00+09:00</published><updated>2021-04-10T22:06:00+09:00</updated><id>https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC</id><content type="html" xml:base="https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;하나의 유저 계정에 여러 로그인 방법 추가 설계 고민&lt;/span&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://jihwankim.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://jihwankim.github.io/" rel="alternate" type="text/html" /><updated>2021-06-17T21:22:48+09:00</updated><id>https://jihwankim.github.io/feed.xml</id><title type="html">JihwanKim Develop Blog</title><subtitle>백엔드 개발자이며, 취미로 플러터, 유니티를 만지는 개발자</subtitle><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><entry><title type="html">Redis 장애</title><link href="https://jihwankim.github.io/moigo/Redis-%EC%9E%A5%EC%95%A0/" rel="alternate" type="text/html" title="Redis 장애" /><published>2021-04-18T00:00:00+09:00</published><updated>2021-04-17T22:06:00+09:00</updated><id>https://jihwankim.github.io/moigo/Redis-%EC%9E%A5%EC%95%A0</id><content type="html" xml:base="https://jihwankim.github.io/moigo/Redis-%EC%9E%A5%EC%95%A0/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;Redis 장애 대응&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;14일 오후 2시 36분 ~ 38분 사이에 서버에 장애가 발생했다.&lt;br /&gt;
+장애 포인트는 AWS Elasticache Redis였고, 36분부터 문제가 생겨 38분에 복구되었다.&lt;br /&gt;
+장애가 발생한 이유는 무엇이고, 어떻게 개선할 것인지에 대해 생각했던 것을 기록하는 글이다.&lt;/p&gt;
+
+&lt;h1 id=&quot;장애가-2분이나-유지된-이유&quot;&gt;장애가 2분이나 유지된 이유&lt;/h1&gt;
+&lt;p&gt;Redis 서비스에서 Primary 1대 Replica 1대를 사용하고 있는데, FailOver 설정을 해두지 않아서, Replica가 자동으로 Primary로 승격되지 않아 장애가 유지되었다. 즉, 장애 복구시간동안, Redis에 대한 요청이 모두 실패하여, 엮여있는 부분에서 장애가 발생하였다.&lt;/p&gt;
+
+&lt;h1 id=&quot;장애-발생에-따라-문제가-된-부분&quot;&gt;장애 발생에 따라 문제가 된 부분&lt;/h1&gt;
+&lt;p&gt;서버에서 세션정보를 저장하는 DB로 Redis를 사용하고 있는데, 유저가 API를 요청하면, 해당 세션이 유효한지 여부를 검증할 수 없는 문제가 발생하였다.&lt;/p&gt;
+
+&lt;h1 id=&quot;추후-장애-발생을-방지하기-위해-어떻게-개선할-것인가&quot;&gt;추후, 장애 발생을 방지하기 위해 어떻게 개선할 것인가&lt;/h1&gt;
+&lt;ol&gt;
+  &lt;li&gt;Redis FailOver: true 설정 ( 기존에는 false로 설정되어있었음. )&lt;/li&gt;
+  &lt;li&gt;Redis Version 5.0.4 -&amp;gt; 5.0.6 으로 업그레이드&lt;/li&gt;
+  &lt;li&gt;MultiAZ 설정 ( 기존에는 false로 설정되어 있었음. )&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&quot;추가적인-개선&quot;&gt;추가적인 개선&lt;/h1&gt;
+&lt;ol&gt;
+  &lt;li&gt;Redis의 Read Replica에 대해서 요청하지 않고 있는데, 읽을 때, Read Replica의 EndPoint로 요청하도록 개선&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&quot;개선-근거&quot;&gt;개선 근거&lt;/h1&gt;
+&lt;h2 id=&quot;redis-failover-true-설정&quot;&gt;Redis FailOver true 설정&lt;/h2&gt;
+&lt;p&gt;해당 설정이 되어 있었으면, replica가 자동으로 primary로 승격되어 장애 시간이 2분이나 되지 않았을 것이다. 하지만, false로 되어 있었기 때문에, primary가 복구될 때 까지 계속 장애가 유지되었다.&lt;/p&gt;
+
+&lt;h2 id=&quot;redis-version-504---506-으로-업그레이드&quot;&gt;Redis Version 5.0.4 -&amp;gt; 5.0.6 으로 업그레이드&lt;/h2&gt;
+&lt;p&gt;아래의 문서를 근거로 버전을 업그레이드 할 예정이다.&lt;br /&gt;
+만약, 문제가 생겨서 Replica가 Primary로 승격된다고 할 때, 읽기 쓰기 모두 장애는 발생하지 않는 방법이 있다면 해당 방법을 사용하는 것이 맞다 생각한다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;AWS 문서 발취&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;ElastiCache for Redis 클러스터의 경우, 클러스터에서 들어오는 쓰기 요청을 처리하는 중에 계획된 노드 교체가 완료됩니다.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;다중 AZ가 활성화되어 5.0.5 이상 엔진에서 실행 중인 Redis 클러스터 모드 비활성화 클러스터의 경우, 클러스터에서 들어오는 쓰기 요청을 처리하는 중에 계획된 노드 교체가 완료됩니다.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;다중 AZ가 활성화되어 5.0.4 이하 엔진에서 실행 중인 Redis Cluster 모드 비활성화 클러스터의 경우, DNS 업데이트와 관련하여 짧은 쓰기 중단이 발생할 수 있습니다. 이 중단은 최대 몇 초가 걸릴 수 있습니다. 이 프로세스는 다중 AZ를 활성화하지 않은 경우 발생하는 새 기본 노드를 다시 생성하고 프로비저닝하는 것보다 훨씬 빠릅니다.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;이후, 업데이트 내역을 살펴보니, 바로 올려도 문제는 없을것 같긴 한데, 테스트정도는 해보는게 맞다고 생각한다.&lt;br /&gt;
+따라서, 개발서버용 Redis를 미리 5.0.6 으로 올려서 테스트 해보고 업데이트할 예정이다.&lt;/p&gt;
+
+&lt;h2 id=&quot;multiaz-설정&quot;&gt;MultiAZ 설정&lt;/h2&gt;
+&lt;p&gt;만약, 특정 리전에서 장애가 발생할 경우, 해당 리전에 primary와 replica가 함께 떠있다면, 그것은 곧 장애로 이어진다.&lt;br /&gt;
+설정을 true로 변경하게 되면, 두개 이상의 리전에서 동시에 문제가 발생하지 않는다면, 서비스는 문제없이 유지될 것이다.&lt;/p&gt;
+
+&lt;h2 id=&quot;redis-read-replica-end-point-사용&quot;&gt;Redis Read Replica End Point 사용&lt;/h2&gt;
+&lt;p&gt;해당 부분은 기존에 사용하고 있지 않아서, 사용하려고 한다.&lt;br /&gt;
+코드 상에서 Read라면, Read EndPoint로 요청할 것이고, Write라면, Primary EndPoint에 요청하게끔 개선할 예정이다.&lt;/p&gt;
+
+&lt;h3 id=&quot;참고링크&quot;&gt;참고링크&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.aws.amazon.com/ko_kr/AmazonElastiCache/latest/red-ug/AutoFailover.html#auto-failover-test&quot;&gt;AWS - FailOver&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;https://docs.aws.amazon.com/ko_kr/AmazonElastiCache/latest/red-ug/Endpoints.html&quot;&gt;AWS - EndPoints&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/BestPractices.html&quot;&gt;AWS - BestPractice&lt;/a&gt;&lt;/p&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="MoiGo" /><category term="MoiGo, Erlang, AWS, Redis" /><summary type="html">Redis 장애 대응</summary></entry><entry><title type="html">Auth와 User 분리</title><link href="https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/" rel="alternate" type="text/html" title="Auth와 User 분리" /><published>2021-04-15T00:00:00+09:00</published><updated>2021-04-10T22:06:00+09:00</updated><id>https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC</id><content type="html" xml:base="https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;하나의 유저 계정에 여러 로그인 방법 추가 설계 고민&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;요즘은 OAuth2를 이용하여 회원가입/로그인하는 서비스들이 매우 많아졌다.&lt;br /&gt;
