@@ -28,4 +28,10 @@ var store = [{
         "tags": ["MoiGo, Erlang, AWS, Redis"],
         "url": "/moigo/Redis-%EC%9E%A5%EC%95%A0/",
         "teaser": null
+      },{
+        "title": "FCM을 사용하면서 발생한 문제들",
+        "excerpt":"FCM을 사용하면서 겪은 문제와 문제를 해결했던 방법. FCM 을 사용하면서 겪은 문제와 해당 문제들을 어떻게 해결하였고, 앞으로 어떤 방식으로 사용을 해야할 지에 대해 고민했던 것들에 대한 글이다. 어디까지나 필자 개인의 경험을 기반으로 한 글이다. 1. FCM Push TOPIC_RATE_EXCEEDED error 하나의 토픽에 많은 양의 데이터를 빠르게 전송하면, 해당 에러가 발생하며, 푸시를...","categories": ["Develop"],
+        "tags": ["FCM"],
+        "url": "/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/",
+        "teaser": null
       }]
