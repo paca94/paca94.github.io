@@ -1,4 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://jihwankim.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://jihwankim.github.io/" rel="alternate" type="text/html" /><updated>2021-06-18T00:25:41+09:00</updated><id>https://jihwankim.github.io/feed.xml</id><title type="html">JihwanKim Develop Blog</title><subtitle>백엔드 개발자이며, 취미로 플러터, 유니티를 만지는 개발자</subtitle><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><entry><title type="html">FCM을 사용하면서 발생한 문제들</title><link href="https://jihwankim.github.io/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/" rel="alternate" type="text/html" title="FCM을 사용하면서 발생한 문제들" /><published>2021-06-17T00:00:00+09:00</published><updated>2021-06-17T22:06:00+09:00</updated><id>https://jihwankim.github.io/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4</id><content type="html" xml:base="https://jihwankim.github.io/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;FCM을 사용하면서 겪은 문제와 문제를 해결했던 방법.&lt;/span&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://jihwankim.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://jihwankim.github.io/" rel="alternate" type="text/html" /><updated>2021-06-18T01:23:15+09:00</updated><id>https://jihwankim.github.io/feed.xml</id><title type="html">JihwanKim Develop Blog</title><subtitle>백엔드 개발자이며, 취미로 플러터, 유니티를 만지는 개발자</subtitle><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><entry><title type="html">PUT Method로 파일 업로드</title><link href="https://jihwankim.github.io/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C/" rel="alternate" type="text/html" title="PUT Method로 파일 업로드" /><published>2021-06-18T00:00:00+09:00</published><updated>2021-06-18T08:01:00+09:00</updated><id>https://jihwankim.github.io/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C</id><content type="html" xml:base="https://jihwankim.github.io/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;Put Method를 통한 파일 업로드&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Flutter 작업도중, 서버단에서 S3에 파일을 업로드를 할 때, SignedURL로 직접 올리도록 구현해놔서, PUT METHOD로 파일을 직접 올려야 할 일이 있었다.&lt;br /&gt;
+하지만, 찾아보니, 대부분 Multipart로 업로드하는 방법에 대해서만 기술해놔서, 해당 코드를 블로그에 기록한다.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Dart&quot;&gt;Future&amp;lt;bool&amp;gt; uploadImage(File file, String uploadURL) async {
+  final dio = new Dio();
+  final option = Options();
+  option.headers = {
+    'Content-Type': &quot;image/${file.path.split(&quot;.&quot;).last}&quot;,
+    'Accept': &quot;*/*&quot;,
+    'Content-Length': file.lengthSync().toString(),
+    'Connection': 'keep-alive',
+  };
+  final fileBytes = file.readAsBytesSync();
+
+  await dio.put(
+    uploadURL,
+    data: Stream.fromIterable(fileBytes.map((e) =&amp;gt; [e])),
+    options: option,
+  );
+}
+&lt;/code&gt;&lt;/pre&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="Flutter" /><category term="Flutter, AWS" /><summary type="html">Put Method를 통한 파일 업로드</summary></entry><entry><title type="html">FCM을 사용하면서 발생한 문제들</title><link href="https://jihwankim.github.io/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/" rel="alternate" type="text/html" title="FCM을 사용하면서 발생한 문제들" /><published>2021-06-17T00:00:00+09:00</published><updated>2021-06-17T23:06:00+09:00</updated><id>https://jihwankim.github.io/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4</id><content type="html" xml:base="https://jihwankim.github.io/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;FCM을 사용하면서 겪은 문제와 문제를 해결했던 방법.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;FCM 을 사용하면서 겪은 문제와 해당 문제들을 어떻게 해결하였고, 앞으로 어떤 방식으로 사용을 해야할 지에 대해 고민했던 것들에 대한 글이다.&lt;/p&gt;
