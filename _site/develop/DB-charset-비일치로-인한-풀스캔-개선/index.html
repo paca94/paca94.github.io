@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Redis 장애 &amp;#124 JihwanKim Develop Blog</title>
-<meta name="description" content="Redis 장애 대응">
+<!-- begin _includes/seo.html --><title>DB Charset 비일치로 인한 풀스캔 개선 &amp;#124 JihwanKim Develop Blog</title>
+<meta name="description" content="Charset 불일치로 인한 풀스캔 수정기">
 
 
   <meta name="author" content="Jihwan Kim">
@@ -22,32 +22,32 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:site_name" content="JihwanKim Develop Blog">
-<meta property="og:title" content="Redis 장애">
-<meta property="og:url" content="https://jihwankim.github.io/moigo/Redis-%EC%9E%A5%EC%95%A0/">
+<meta property="og:title" content="DB Charset 비일치로 인한 풀스캔 개선">
+<meta property="og:url" content="https://jihwankim.github.io/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0/">
 
 
-  <meta property="og:description" content="Redis 장애 대응">
-
-
-
+  <meta property="og:description" content="Charset 불일치로 인한 풀스캔 수정기">
 
 
 
 
-  <meta property="article:published_time" content="2021-04-18T00:00:00+09:00">
 
 
 
-  <meta property="article:modified_time" content="2021-04-17T22:06:00+09:00">
+  <meta property="article:published_time" content="2021-07-07T00:00:00+09:00">
 
 
 
-  
+  <meta property="article:modified_time" content="2021-07-07T23:30:00+09:00">
+
+
 
   
 
+  
 
-<link rel="canonical" href="https://jihwankim.github.io/moigo/Redis-%EC%9E%A5%EC%95%A0/">
+
+<link rel="canonical" href="https://jihwankim.github.io/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0/">
 
 
 
@@ -180,7 +180,7 @@
       
         
         <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-          <a href="/categories/#moigo" itemprop="item"><span itemprop="name">Moigo</span></a>
+          <a href="/categories/#develop" itemprop="item"><span itemprop="name">Develop</span></a>
           <meta itemprop="position" content="2" />
         </li>
         <span class="sep">/</span>
@@ -188,7 +188,7 @@
     
       
       
-        <li class="current">Redis 장애</li>
+        <li class="current">DB Charset 비일치로 인한 풀스캔 개선</li>
       
     
   </ol>
@@ -318,206 +318,17 @@
 
 
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="Redis 장애">
-    <meta itemprop="description" content="Redis 장애 대응">
-    <meta itemprop="datePublished" content="2021-04-18T00:00:00+09:00">
-    <meta itemprop="dateModified" content="2021-04-17T22:06:00+09:00">
+    <meta itemprop="headline" content="DB Charset 비일치로 인한 풀스캔 개선">
+    <meta itemprop="description" content="문자열 불일치로 인한 풀스캔 수정기">
+    <meta itemprop="datePublished" content="2021-07-07T00:00:00+09:00">
+    <meta itemprop="dateModified" content="2021-07-07T23:30:00+09:00">
 
     <div class="page__inner-wrap">
       
         <header>
-          <h1 id="page-title" class="page__title" itemprop="headline">Redis 장애
+          <h1 id="page-title" class="page__title" itemprop="headline">DB Charset 비일치로 인한 풀스캔 개선
 </h1>
           
-
-  <p class="page__meta">
-    
-
-    
-
-    
-      
-      
-
-      <span class="page__meta-readtime">
-        <i class="far fa-clock" aria-hidden="true"></i>
-        
-          1 분 소요
-        
-      </span>
-    
-  </p>
-
-
-        </header>
-      
-
-      <section class="page__content" itemprop="text">
-        
-          <aside class="sidebar__right sticky">
-            <nav class="toc">
-              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> 목차</h4></header>
-              <ul class="toc__menu"><li><a href="#장애가-2분이나-유지된-이유">장애가 2분이나 유지된 이유</a></li><li><a href="#장애-발생에-따라-문제가-된-부분">장애 발생에 따라 문제가 된 부분</a></li><li><a href="#추후-장애-발생을-방지하기-위해-어떻게-개선할-것인가">추후, 장애 발생을 방지하기 위해 어떻게 개선할 것인가</a></li><li><a href="#추가적인-개선">추가적인 개선</a></li><li><a href="#개선-근거">개선 근거</a><ul><li><a href="#redis-failover-true-설정">Redis FailOver true 설정</a></li><li><a href="#redis-version-504---506-으로-업그레이드">Redis Version 5.0.4 -&gt; 5.0.6 으로 업그레이드</a></li><li><a href="#multiaz-설정">MultiAZ 설정</a></li><li><a href="#redis-read-replica-end-point-사용">Redis Read Replica End Point 사용</a><ul><li><a href="#참고링크">참고링크</a></li></ul></li></ul></li></ul>
-
-            </nav>
-          </aside>
-        
-        <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Redis 장애 대응</span>
-</code></pre></div></div>
-
-<p>14일 오후 2시 36분 ~ 38분 사이에 서버에 장애가 발생했다.<br />
-장애 포인트는 AWS Elasticache Redis였고, 36분부터 문제가 생겨 38분에 복구되었다.<br />
-장애가 발생한 이유는 무엇이고, 어떻게 개선할 것인지에 대해 생각했던 것을 기록하는 글이다.</p>
-
-<h1 id="장애가-2분이나-유지된-이유">장애가 2분이나 유지된 이유</h1>
-<p>Redis 서비스에서 Primary 1대 Replica 1대를 사용하고 있는데, FailOver 설정을 해두지 않아서, Replica가 자동으로 Primary로 승격되지 않아 장애가 유지되었다. 즉, 장애 복구시간동안, Redis에 대한 요청이 모두 실패하여, 엮여있는 부분에서 장애가 발생하였다.</p>
-
-<h1 id="장애-발생에-따라-문제가-된-부분">장애 발생에 따라 문제가 된 부분</h1>
-<p>서버에서 세션정보를 저장하는 DB로 Redis를 사용하고 있는데, 유저가 API를 요청하면, 해당 세션이 유효한지 여부를 검증할 수 없는 문제가 발생하였다.</p>
-
-<h1 id="추후-장애-발생을-방지하기-위해-어떻게-개선할-것인가">추후, 장애 발생을 방지하기 위해 어떻게 개선할 것인가</h1>
-<ol>
-  <li>Redis FailOver: true 설정 ( 기존에는 false로 설정되어있었음. )</li>
-  <li>Redis Version 5.0.4 -&gt; 5.0.6 으로 업그레이드</li>
-  <li>MultiAZ 설정 ( 기존에는 false로 설정되어 있었음. )</li>
-</ol>
-
-<h1 id="추가적인-개선">추가적인 개선</h1>
-<ol>
-  <li>Redis의 Read Replica에 대해서 요청하지 않고 있는데, 읽을 때, Read Replica의 EndPoint로 요청하도록 개선</li>
-</ol>
-
-<h1 id="개선-근거">개선 근거</h1>
-<h2 id="redis-failover-true-설정">Redis FailOver true 설정</h2>
-<p>해당 설정이 되어 있었으면, replica가 자동으로 primary로 승격되어 장애 시간이 2분이나 되지 않았을 것이다. 하지만, false로 되어 있었기 때문에, primary가 복구될 때 까지 계속 장애가 유지되었다.</p>
-
-<h2 id="redis-version-504---506-으로-업그레이드">Redis Version 5.0.4 -&gt; 5.0.6 으로 업그레이드</h2>
-<p>아래의 문서를 근거로 버전을 업그레이드 할 예정이다.<br />
-만약, 문제가 생겨서 Replica가 Primary로 승격된다고 할 때, 읽기 쓰기 모두 장애는 발생하지 않는 방법이 있다면 해당 방법을 사용하는 것이 맞다 생각한다.</p>
-
-<p><strong>AWS 문서 발취</strong></p>
-<blockquote>
-  <p>ElastiCache for Redis 클러스터의 경우, 클러스터에서 들어오는 쓰기 요청을 처리하는 중에 계획된 노드 교체가 완료됩니다.</p>
-</blockquote>
-
-<blockquote>
-  <p>다중 AZ가 활성화되어 5.0.5 이상 엔진에서 실행 중인 Redis 클러스터 모드 비활성화 클러스터의 경우, 클러스터에서 들어오는 쓰기 요청을 처리하는 중에 계획된 노드 교체가 완료됩니다.</p>
-</blockquote>
-
-<blockquote>
-  <p>다중 AZ가 활성화되어 5.0.4 이하 엔진에서 실행 중인 Redis Cluster 모드 비활성화 클러스터의 경우, DNS 업데이트와 관련하여 짧은 쓰기 중단이 발생할 수 있습니다. 이 중단은 최대 몇 초가 걸릴 수 있습니다. 이 프로세스는 다중 AZ를 활성화하지 않은 경우 발생하는 새 기본 노드를 다시 생성하고 프로비저닝하는 것보다 훨씬 빠릅니다.</p>
-</blockquote>
-
-<p>이후, 업데이트 내역을 살펴보니, 바로 올려도 문제는 없을것 같긴 한데, 테스트정도는 해보는게 맞다고 생각한다.<br />
-따라서, 개발서버용 Redis를 미리 5.0.6 으로 올려서 테스트 해보고 업데이트할 예정이다.</p>
-
-<h2 id="multiaz-설정">MultiAZ 설정</h2>
-<p>만약, 특정 리전에서 장애가 발생할 경우, 해당 리전에 primary와 replica가 함께 떠있다면, 그것은 곧 장애로 이어진다.<br />
-설정을 true로 변경하게 되면, 두개 이상의 리전에서 동시에 문제가 발생하지 않는다면, 서비스는 문제없이 유지될 것이다.</p>
-
-<h2 id="redis-read-replica-end-point-사용">Redis Read Replica End Point 사용</h2>
-<p>해당 부분은 기존에 사용하고 있지 않아서, 사용하려고 한다.<br />
-코드 상에서 Read라면, Read EndPoint로 요청할 것이고, Write라면, Primary EndPoint에 요청하게끔 개선할 예정이다.</p>
-
-<h3 id="참고링크">참고링크</h3>
-<p><a href="https://docs.aws.amazon.com/ko_kr/AmazonElastiCache/latest/red-ug/AutoFailover.html#auto-failover-test">AWS - FailOver</a><br />
-<a href="https://docs.aws.amazon.com/ko_kr/AmazonElastiCache/latest/red-ug/Endpoints.html">AWS - EndPoints</a><br />
-<a href="https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/BestPractices.html">AWS - BestPractice</a></p>
-
-        
-      </section>
-
-      <footer class="page__meta">
-        
-        
-  
-
-
-  
-
-  <p class="page__taxonomy">
-    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 태그: </strong>
-    <span itemprop="keywords">
-    
-      <a href="/tags/#moigo-erlang-aws-redis" class="page__taxonomy-item" rel="tag">MoiGo, Erlang, AWS, Redis</a>
-    
-    </span>
-  </p>
-
-
-
-
-  
-
-
-  
-
-  <p class="page__taxonomy">
-    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 카테고리: </strong>
-    <span itemprop="keywords">
-    
-      <a href="/categories/#moigo" class="page__taxonomy-item" rel="tag">MoiGo</a>
-    
-    </span>
-  </p>
-
-
-        
-  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 업데이트:</strong> <time datetime="2021-04-17">April 17, 2021</time></p>
-
-
-      </footer>
-
-      <section class="page__share">
-  
-    <h4 class="page__share-title">공유하기</h4>
-  
-
-  <a href="https://twitter.com/intent/tweet?text=Redis+%EC%9E%A5%EC%95%A0%20https%3A%2F%2Fjihwankim.github.io%2Fmoigo%2FRedis-%25EC%259E%25A5%25EC%2595%25A0%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
-
-  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjihwankim.github.io%2Fmoigo%2FRedis-%25EC%259E%25A5%25EC%2595%25A0%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
-
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fjihwankim.github.io%2Fmoigo%2FRedis-%25EC%259E%25A5%25EC%2595%25A0%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
-</section>
-
-
-      
-  <nav class="pagination">
-    
-      <a href="/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/" class="pagination--pager" title="Auth와 User 분리
-">이전</a>
-    
-    
-      <a href="/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/" class="pagination--pager" title="FCM을 사용하면서 발생한 문제들
-">다음</a>
-    
-  </nav>
-
-    </div>
-
-    
-  </article>
-
-  
-  
-    <div class="page__related">
-      <h4 class="page__related-title">참고</h4>
-      <div class="grid__wrapper">
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title no_toc" itemprop="headline">
-      
-        <a href="/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0/" rel="permalink">DB Charset 비일치로 인한 풀스캔 개선
-</a>
-      
-    </h2>
-    
 
   <p class="page__meta">
     
@@ -538,12 +349,128 @@
   </p>
 
 
-    <p class="archive__item-excerpt" itemprop="description">문자열 불일치로 인한 풀스캔 수정기
+        </header>
+      
 
-</p>
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> 목차</h4></header>
+              <ul class="toc__menu"><li><a href="#문제-발견">문제 발견</a></li><li><a href="#원인-분석">원인 분석</a></li><li><a href="#해결">해결</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">문자열 불일치로 인한 풀스캔 수정기</span>
+</code></pre></div></div>
+
+<h1 id="문제-발견">문제 발견</h1>
+
+<ol>
+  <li>AWS slowQuery 로그 상에 특정 쿼리가 오래 걸리는 것을 발견함.</li>
+</ol>
+
+<h1 id="원인-분석">원인 분석</h1>
+
+<ol>
+  <li>해당 쿼리문과 테이블을 살펴보면, 풀스캔을 하지 않도록 정상적으로 인덱스가 걸려있고, 해당 인덱스를 조건으로 사용하고 있음.</li>
+  <li>Expain 해본 결과, 아래와 같이 조건 비교시, 다른 charset으로 convert하고 있음.
+ <img src="/assets/image/slow_query/convert.png" alt="image" /></li>
+  <li>따라서, 아래 쿼리문을 통해 charset값이 utf8mb4가 아닌것들을 조회함.
+    <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">SELECT</span> <span class="k">TABLE_NAME</span><span class="p">,</span> <span class="k">COLUMN_NAME</span><span class="p">,</span> <span class="n">COLUMN_TYPE</span><span class="p">,</span><span class="k">character_set_name</span><span class="p">,</span><span class="k">COLLATION_NAME</span> <span class="k">FROM</span> <span class="n">information_schema</span><span class="p">.</span><span class="nv">`COLUMNS`</span> <span class="k">C</span>
+ <span class="k">WHERE</span> <span class="n">table_schema</span> <span class="o">=</span> <span class="nv">"db"</span>
+ <span class="k">AND</span> <span class="k">character_set_name</span> <span class="o">!=</span> <span class="s1">'utf8mb4'</span>
+</code></pre></div>    </div>
+    <p><img src="/assets/image/slow_query/charset.png" alt="image" /></p>
+  </li>
+</ol>
+
+<h1 id="해결">해결</h1>
+
+<ol>
+  <li>charset이 <strong>utf8/ascii/laten1</strong> 인 것들을 <strong>utf8mb4</strong>로 변환함</li>
+  <li>풀스캔을 하지 않게 되서 쿼리 동작 속도가 빨라짐</li>
+</ol>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 태그: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#mysql" class="page__taxonomy-item" rel="tag">mysql</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 카테고리: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#develop" class="page__taxonomy-item" rel="tag">Develop</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 업데이트:</strong> <time datetime="2021-07-07">July 7, 2021</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">공유하기</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=DB+Charset+%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C+%EC%9D%B8%ED%95%9C+%ED%92%80%EC%8A%A4%EC%BA%94+%EA%B0%9C%EC%84%A0%20https%3A%2F%2Fjihwankim.github.io%2Fdevelop%2FDB-charset-%25EB%25B9%2584%25EC%259D%25BC%25EC%25B9%2598%25EB%25A1%259C-%25EC%259D%25B8%25ED%2595%259C-%25ED%2592%2580%25EC%258A%25A4%25EC%25BA%2594-%25EA%25B0%259C%25EC%2584%25A0%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjihwankim.github.io%2Fdevelop%2FDB-charset-%25EB%25B9%2584%25EC%259D%25BC%25EC%25B9%2598%25EB%25A1%259C-%25EC%259D%25B8%25ED%2595%259C-%25ED%2592%2580%25EC%258A%25A4%25EC%25BA%2594-%25EA%25B0%259C%25EC%2584%25A0%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fjihwankim.github.io%2Fdevelop%2FDB-charset-%25EB%25B9%2584%25EC%259D%25BC%25EC%25B9%2598%25EB%25A1%259C-%25EC%259D%25B8%25ED%2595%259C-%25ED%2592%2580%25EC%258A%25A4%25EC%25BA%2594-%25EA%25B0%259C%25EC%2584%25A0%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/develop/LawDocOffice-%EC%84%9C%EB%B2%84-%EA%B0%9C%EB%B0%9C%EA%B8%B0/" class="pagination--pager" title="LawDocOffice Server 개발기(토이, ts)
+">이전</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">다음</a>
+    
+  </nav>
+
+    </div>
+
+    
   </article>
-</div>
 
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">참고</h4>
+      <div class="grid__wrapper">
         
           
 
@@ -662,6 +589,47 @@
 
 
     <p class="archive__item-excerpt" itemprop="description">FCM을 사용하면서 겪은 문제와 문제를 해결했던 방법.
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/moigo/Redis-%EC%9E%A5%EC%95%A0/" rel="permalink">Redis 장애
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Redis 장애 대응
 
 </p>
   </article>

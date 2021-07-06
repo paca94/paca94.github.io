@@ -40,4 +40,16 @@ var store = [{
         "tags": ["Flutter, AWS"],
         "url": "/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C/",
         "teaser": null
+      },{
+        "title": "LawDocOffice Server 개발기(토이, ts)",
+        "excerpt":"LawDocOffice Server 개발기(토이, ts) Github Link 개발기간 LawDocOffice 2020.10.27 ~ 2020.11.16 LawSubAgent 2020.12.16 ~ 2020.12.30 과거 아는분과 기회가 되서, 간단한 토이를 진행했었는데, 작업을 했었던 것에 대한 기록이다. 사용햤던 기술 언어 : TypeScript 기존에 NodeJS를 간단하게 쓰고 있었는데, 타입이 추가되고 여러가지 부분에서 편해진 TypeScript가 요즘 괜찮다는 지인의 추천이 떠올라 해당 언어를...","categories": ["Develop"],
+        "tags": ["ts"],
+        "url": "/develop/LawDocOffice-%EC%84%9C%EB%B2%84-%EA%B0%9C%EB%B0%9C%EA%B8%B0/",
+        "teaser": null
+      },{
+        "title": "DB Charset 비일치로 인한 풀스캔 개선",
+        "excerpt":"문자열 불일치로 인한 풀스캔 수정기 문제 발견 AWS slowQuery 로그 상에 특정 쿼리가 오래 걸리는 것을 발견함. 원인 분석 해당 쿼리문과 테이블을 살펴보면, 풀스캔을 하지 않도록 정상적으로 인덱스가 걸려있고, 해당 인덱스를 조건으로 사용하고 있음. Expain 해본 결과, 아래와 같이 조건 비교시, 다른 charset으로 convert하고 있음. 따라서, 아래 쿼리문을 통해 charset값이...","categories": ["Develop"],
+        "tags": ["mysql"],
+        "url": "/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0/",
+        "teaser": null
       }]
