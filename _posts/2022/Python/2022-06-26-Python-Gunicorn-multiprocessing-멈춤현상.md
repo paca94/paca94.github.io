@@ -3,7 +3,7 @@ title: "Python Gunicorn multiproessing 멈춤현상"
 search: true
 categories:
   - Python
-last_modified_at: 2022-06-45T18:46:00+09:00
+last_modified_at: 2022-06-26T18:46:00+09:00
 layout: single
 author_profile: true
 read_time: true
