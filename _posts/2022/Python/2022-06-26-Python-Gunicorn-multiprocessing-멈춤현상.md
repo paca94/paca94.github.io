@@ -67,7 +67,7 @@ def mp_function_wrapper(function, args):
 
 # 추가 확인
 이후, 별도로 확인해본 결과, Python3.6 Python3.7에서 발생함  
-둘 모두 지원 종료된 버전이므로 별도의 확인은 하지 않음.
+둘 모두 지원 종료된 버전이므로 별도로 Gunicorn소스 까보며 확인하진 않음.
 
 
 # 증상 확인용으로 사용했던 코드
