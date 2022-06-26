@@ -35,6 +35,7 @@ gunicorn 20.x
 
 # 현상
 gunicorn worker에서 만든 sub process에서 http 요청이 섞여있는 함수를 실행하다가 익셉션 발생시, 만들어진 sub process가 멈춤.  
+정확히는 Pool에 들어간 작업이 모두 끝나서 pool.terminate() 동작에 들어갔으나, sub process(os.waitpid로 무한정 대기)가 종료되질 않아서 무한정 대기함.
 
 
 # 현상 발생 조건 확인
