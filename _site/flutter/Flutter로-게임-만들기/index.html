@@ -6,87 +6,46 @@
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
 -->
 <html lang="ko" class="no-js">
-  <head>
-    <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Flutter로 게임 만들기 &amp;#124 paca94 Develop Blog</title>
-<meta name="description" content="회사 창립기념일 기념 공모전에 제출할 게임을 만들다">
-
-
+<head>
+  <meta charset="utf-8">
+  <!-- begin _includes/seo.html -->
+  <title>Flutter로 게임 만들기 &amp;#124 paca94 Develop Blog</title>
+  <meta name="description" content="회사 창립기념일 기념 공모전에 제출할 게임을 만들다">
   <meta name="author" content="paca94">
-  
   <meta property="article:author" content="paca94">
-  
-
-
-<meta property="og:type" content="article">
-<meta property="og:locale" content="ko_KR">
-<meta property="og:site_name" content="paca94 Develop Blog">
-<meta property="og:title" content="Flutter로 게임 만들기">
-<meta property="og:url" content="http://localhost:4000/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/">
-
-
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:site_name" content="paca94 Develop Blog">
+  <meta property="og:title" content="Flutter로 게임 만들기">
+  <meta property="og:url"
+    content="https://paca94.github.io/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/">
   <meta property="og:description" content="회사 창립기념일 기념 공모전에 제출할 게임을 만들다">
-
-
-
-
-
-
-
   <meta property="article:published_time" content="2022-06-26T00:00:00+09:00">
-
-
-
   <meta property="article:modified_time" content="2022-06-26T17:23:00+09:00">
-
-
-
-  
-
-  
-
-
-<link rel="canonical" href="http://localhost:4000/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/">
-
-
-
-
-<script type="application/ld+json">
+  <link rel="canonical"
+    href="https://paca94.github.io/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/">
+  <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    
+
       "@type": "Person",
       "name": "paca94",
-      "url": "http://localhost:4000/"
-    
+      "url": "https://paca94.github.io/"
+
   }
 </script>
-
-
-
-
-
-
-<!-- end _includes/seo.html -->
-
-
-
+  <!-- end _includes/seo.html -->
   <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="paca94 Develop Blog Feed">
-
-
-<!-- https://t.co/dKP3o1e -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<script>
-  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
-</script>
-
-<!-- For all browsers -->
-<link rel="stylesheet" href="/assets/css/main.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
-
-<!--[if IE]>
+  <!-- https://t.co/dKP3o1e -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+  </script>
+  <!-- For all browsers -->
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+  <!--[if IE]>
   <style>
     /* old IE unsupported flexbox fixes */
     .greedy-nav .site-title {
@@ -100,603 +59,280 @@
     }
   </style>
 <![endif]-->
+  <!-- start custom head snippets -->
+  <!-- insert favicons. use https://realfavicongenerator.net/ -->
+  <!-- end custom head snippets -->
+</head>
 
-
-    <!-- start custom head snippets -->
-
-<!-- insert favicons. use https://realfavicongenerator.net/ -->
-
-<!-- end custom head snippets -->
-
-  </head>
-
-  <body class="layout--single">
-    <nav class="skip-links">
-  <h2 class="screen-reader-text">Skip links</h2>
-  <ul>
-    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
-    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
-    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
-  </ul>
-</nav>
-
-    <!--[if lt IE 9]>
+<body class="layout--single">
+  <nav class="skip-links">
+    <h2 class="screen-reader-text">Skip links</h2>
+    <ul>
+      <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+      <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+      <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+    </ul>
+  </nav>
+  <!--[if lt IE 9]>
 <div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
 <![endif]-->
-
-    
-
-<div class="masthead">
-  <div class="masthead__inner-wrap">
-    <div class="masthead__menu">
-      <nav id="site-nav" class="greedy-nav">
-        
-        <a class="site-title" href="/">
-          즐기는 개발자
-          <span class="site-subtitle">Version 1.0</span>
-        </a>
-        <ul class="visible-links"><li class="masthead__menu-item">
+  <div class="masthead">
+    <div class="masthead__inner-wrap">
+      <div class="masthead__menu">
+        <nav id="site-nav" class="greedy-nav">
+          <a class="site-title" href="/"> 즐기는 개발자 <span class="site-subtitle">Version 1.0</span>
+          </a>
+          <ul class="visible-links">
+            <li class="masthead__menu-item">
               <a href="/categories/">Categories</a>
-            </li><li class="masthead__menu-item">
+            </li>
+            <li class="masthead__menu-item">
               <a href="/tags/">Tags</a>
-            </li><li class="masthead__menu-item">
+            </li>
+            <li class="masthead__menu-item">
               <a href="/about/">About</a>
-            </li><li class="masthead__menu-item">
+            </li>
+            <li class="masthead__menu-item">
               <a href="/posts/">연도별 포스트</a>
-            </li></ul>
-        
-        <button class="greedy-nav__toggle hidden" type="button">
-          <span class="visually-hidden">토글 메뉴</span>
-          <div class="navicon"></div>
-        </button>
-        <ul class="hidden-links hidden"></ul>
-      </nav>
+            </li>
+          </ul>
+          <button class="greedy-nav__toggle hidden" type="button">
+            <span class="visually-hidden">토글 메뉴</span>
+            <div class="navicon"></div>
+          </button>
+          <ul class="hidden-links hidden"></ul>
+        </nav>
+      </div>
     </div>
   </div>
-</div>
-
-
-    <div class="initial-content">
-      
-
-
-  
-    
-
-
-
-<nav class="breadcrumbs">
-  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
-    
-    
-    
-      
+  <div class="initial-content">
+    <nav class="breadcrumbs">
+      <ol itemscope itemtype="https://schema.org/BreadcrumbList">
         <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-          <a href="http://localhost:4000/" itemprop="item"><span itemprop="name">Home</span></a>
+          <a href="https://paca94.github.io/" itemprop="item"><span itemprop="name">Home</span></a>
           <meta itemprop="position" content="1" />
         </li>
         <span class="sep">/</span>
-      
-      
-        
         <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
           <a href="/categories/#flutter" itemprop="item"><span itemprop="name">Flutter</span></a>
           <meta itemprop="position" content="2" />
         </li>
         <span class="sep">/</span>
-      
-    
-      
-      
         <li class="current">Flutter로 게임 만들기</li>
-      
-    
-  </ol>
-</nav>
-
-  
-
-
-<div id="main" role="main">
-  
-  <div class="sidebar sticky">
-  
-
-
-<div itemscope itemtype="https://schema.org/Person">
-
-  
-
-  <div class="author__content">
-    
-      <h3 class="author__name" itemprop="name">paca94</h3>
-    
-    
-      <div class="author__bio" itemprop="description">
-        <p>고민이 생기고 해당 고민에 대해 어떤 결과를 도출해내는지 써내려가는 블로그입니다.<br />여러가지 의견은 언제나 환영입니다!</p>
-
-      </div>
-    
-  </div>
-
-  <div class="author__urls-wrapper">
-    <button class="btn btn--inverse">팔로우</button>
-    <ul class="author__urls social-icons">
-      
-        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
-          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Republic Of Korea. Daejeon</span>
-        </li>
-      
-
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-            <li><a href="https://github.com/paca94" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
-          
-        
-          
-        
-      
-
-      
-
-      
-        <li>
-          <a href="mailto:jihwan.dev@gmail.com">
-            <meta itemprop="email" content="jihwan.dev@gmail.com" />
-            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">이메일</span>
-          </a>
-        </li>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      <!--
+      </ol>
+    </nav>
+    <div id="main" role="main">
+      <div class="sidebar sticky">
+        <div itemscope itemtype="https://schema.org/Person">
+          <div class="author__content">
+            <h3 class="author__name" itemprop="name">paca94</h3>
+            <div class="author__bio" itemprop="description">
+              <p>고민이 생기고 해당 고민에 대해 어떤 결과를 도출해내는지 써내려가는 블로그입니다.<br />여러가지 의견은 언제나 환영입니다!</p>
+            </div>
+          </div>
+          <div class="author__urls-wrapper">
+            <button class="btn btn--inverse">팔로우</button>
+            <ul class="author__urls social-icons">
+              <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+                <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Republic Of Korea.
+                  Seooul</span>
+              </li>
+              <li><a href="mailto:jihwan.dev@gmail.com" rel="nofollow noopener noreferrer"><i
+                    class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span></a>
+              </li>
+              <li><a href="https://github.com/paca94" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github"
+                    aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+              <li>
+                <a href="mailto:jihwan.dev@gmail.com">
+                  <meta itemprop="email" content="jihwan.dev@gmail.com" />
+                  <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">이메일</span>
+                </a>
+              </li>
+              <!--
   <li>
     <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
       <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
     </a>
   </li>
 -->
-    </ul>
-  </div>
-</div>
-
-  
-  </div>
-
-
-
-  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="Flutter로 게임 만들기">
-    <meta itemprop="description" content="Flutter로 게임 만들기">
-    <meta itemprop="datePublished" content="2022-06-26T00:00:00+09:00">
-    <meta itemprop="dateModified" content="2022-06-26T17:23:00+09:00">
-
-    <div class="page__inner-wrap">
-      
-        <header>
-          <h1 id="page-title" class="page__title" itemprop="headline">Flutter로 게임 만들기
-</h1>
-          
-
-  <p class="page__meta">
-    
-
-    
-
-    
-      
-      
-
-      <span class="page__meta-readtime">
-        <i class="far fa-clock" aria-hidden="true"></i>
-        
-          최대 1 분 소요
-        
-      </span>
-    
-  </p>
-
-
-        </header>
-      
-
-      <section class="page__content" itemprop="text">
-        
-          <aside class="sidebar__right sticky">
-            <nav class="toc">
-              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> 목차</h4></header>
-              <ul class="toc__menu"><li><a href="#게임을-만들게-된-이유">게임을 만들게 된 이유</a></li><li><a href="#기술-스택">기술 스택</a></li><li><a href="#걸린-시간">걸린 시간</a></li><li><a href="#github-repo-link">Github Repo Link</a></li><li><a href="#게임">게임</a></li></ul>
-
-            </nav>
-          </aside>
-        
-        <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Flutter로 게임 만들기</span>
-</code></pre></div></div>
-
-<h1 id="게임을-만들게-된-이유">게임을 만들게 된 이유</h1>
-<p>이전부터 게임하나를 만들어볼까 생각하고 있었는데, 마침 회사 창립 기념일 공모전이 열렸고, 해당 게임을 개발하여 응모하였다.</p>
-
-<h1 id="기술-스택">기술 스택</h1>
-<p>Client</p>
-<ul>
-  <li>Flutter</li>
-  <li>GetX ( Flutter State manager )</li>
-  <li>Flame ( Flutter Game Engine )</li>
-</ul>
-
-<p>Server</p>
-<ul>
-  <li>AWS Lambda</li>
-  <li>AWS EventBridge</li>
-  <li>MySQL</li>
-  <li>Firebase Auth</li>
-</ul>
-
-<h1 id="걸린-시간">걸린 시간</h1>
-<p>총 3일 걸렸다. (Asset 검색 + 도트찍기 1일 / 개발 2일)</p>
-
-<h1 id="github-repo-link">Github Repo Link</h1>
-<p>https://github.com/JihwanKim/run_kkomi_public</p>
-
-<h1 id="게임">게임</h1>
-<p><strong>만약, 게임 로딩이 되지 않는다면 새로고침 하세요!</strong></p>
-<iframe src="../../../assets/kkomi_run/index.html" width="500" height="500"></iframe>
-
-        
-      </section>
-
-      <footer class="page__meta">
-        
-        
-  
-
-
-  
-
-  <p class="page__taxonomy">
-    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 태그: </strong>
-    <span itemprop="keywords">
-    
-      <a href="/tags/#flutter-flame" class="page__taxonomy-item" rel="tag">Flutter, Flame</a>
-    
-    </span>
-  </p>
-
-
-
-
-  
-
-
-  
-
-  <p class="page__taxonomy">
-    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 카테고리: </strong>
-    <span itemprop="keywords">
-    
-      <a href="/categories/#flutter" class="page__taxonomy-item" rel="tag">Flutter</a>
-    
-    </span>
-  </p>
-
-
-        
-  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 업데이트:</strong> <time datetime="2022-06-26">June 26, 2022</time></p>
-
-
-      </footer>
-
-      <section class="page__share">
-  
-    <h4 class="page__share-title">공유하기</h4>
-  
-
-  <a href="https://twitter.com/intent/tweet?text=Flutter%EB%A1%9C+%EA%B2%8C%EC%9E%84+%EB%A7%8C%EB%93%A4%EA%B8%B0%20http%3A%2F%2Flocalhost%3A4000%2Fflutter%2FFlutter%25EB%25A1%259C-%25EA%25B2%258C%25EC%259E%2584-%25EB%25A7%258C%25EB%2593%25A4%25EA%25B8%25B0%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
-
-  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fflutter%2FFlutter%25EB%25A1%259C-%25EA%25B2%258C%25EC%259E%2584-%25EB%25A7%258C%25EB%2593%25A4%25EA%25B8%25B0%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
-
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fflutter%2FFlutter%25EB%25A1%259C-%25EA%25B2%258C%25EC%259E%2584-%25EB%25A7%258C%25EB%2593%25A4%25EA%25B8%25B0%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
-</section>
-
-
-      
-  <nav class="pagination">
-    
-      <a href="/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/" class="pagination--pager" title="Python Object 쪼개보기
+            </ul>
+          </div>
+        </div>
+      </div>
+      <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+        <meta itemprop="headline" content="Flutter로 게임 만들기">
+        <meta itemprop="description" content="Flutter로 게임 만들기">
+        <meta itemprop="datePublished" content="2022-06-26T00:00:00+09:00">
+        <meta itemprop="dateModified" content="2022-06-26T17:23:00+09:00">
+        <div class="page__inner-wrap">
+          <header>
+            <h1 id="page-title" class="page__title" itemprop="headline">Flutter로 게임 만들기 </h1>
+            <p class="page__meta">
+              <span class="page__meta-readtime">
+                <i class="far fa-clock" aria-hidden="true"></i> 최대 1 분 소요 </span>
+            </p>
+          </header>
+          <section class="page__content" itemprop="text">
+            <aside class="sidebar__right sticky">
+              <nav class="toc">
+                <header>
+                  <h4 class="nav__title"><i class="fas fa-file-alt"></i> 목차</h4>
+                </header>
+                <ul class="toc__menu">
+                  <li><a href="#게임을-만들게-된-이유">게임을 만들게 된 이유</a></li>
+                  <li><a href="#기술-스택">기술 스택</a></li>
+                  <li><a href="#걸린-시간">걸린 시간</a></li>
+                  <li><a href="#github-repo-link">Github Repo Link</a></li>
+                  <li><a href="#게임">게임</a></li>
+                </ul>
+              </nav>
+            </aside>
+            <div class="language-yaml highlighter-rouge">
+              <div class="highlight">
+                <pre class="highlight"><code><span class="s">Flutter로 게임 만들기</span>
+</code></pre>
+              </div>
+            </div>
+            <h1 id="게임을-만들게-된-이유">게임을 만들게 된 이유</h1>
+            <p>이전부터 게임하나를 만들어볼까 생각하고 있었는데, 마침 회사 창립 기념일 공모전이 열렸고, 해당 게임을 개발하여 응모하였다.</p>
+            <h1 id="기술-스택">기술 스택</h1>
+            <p>Client</p>
+            <ul>
+              <li>Flutter</li>
+              <li>GetX ( Flutter State manager )</li>
+              <li>Flame ( Flutter Game Engine )</li>
+            </ul>
+            <p>Server</p>
+            <ul>
+              <li>AWS Lambda</li>
+              <li>AWS EventBridge</li>
+              <li>MySQL</li>
+              <li>Firebase Auth</li>
+            </ul>
+            <h1 id="걸린-시간">걸린 시간</h1>
+            <p>총 3일 걸렸다. (Asset 검색 + 도트찍기 1일 / 개발 2일)</p>
+            <h1 id="github-repo-link">Github Repo Link</h1>
+            <p>https://github.com/JihwanKim/run_kkomi_public</p>
+            <h1 id="게임">게임</h1>
+            <p><strong>만약, 게임 로딩이 되지 않는다면 새로고침 하세요!</strong></p>
+            <iframe src="../../../assets/kkomi_run/index.html" width="500" height="500"></iframe>
+          </section>
+          <footer class="page__meta">
+            <p class="page__taxonomy">
+              <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 태그: </strong>
+              <span itemprop="keywords">
+                <a href="/tags/#flutter-flame" class="page__taxonomy-item" rel="tag">Flutter, Flame</a>
+              </span>
+            </p>
+            <p class="page__taxonomy">
+              <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 카테고리: </strong>
+              <span itemprop="keywords">
+                <a href="/categories/#flutter" class="page__taxonomy-item" rel="tag">Flutter</a>
+              </span>
+            </p>
+            <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 업데이트:</strong>
+              <time datetime="2022-06-26">June 26, 2022</time></p>
+          </footer>
+          <section class="page__share">
+            <h4 class="page__share-title">공유하기</h4>
+            <a href="https://twitter.com/intent/tweet?text=Flutter%EB%A1%9C+%EA%B2%8C%EC%9E%84+%EB%A7%8C%EB%93%A4%EA%B8%B0%20http%3A%2F%2Flocalhost%3A4000%2Fflutter%2FFlutter%25EB%25A1%259C-%25EA%25B2%258C%25EC%259E%2584-%25EB%25A7%258C%25EB%2593%25A4%25EA%25B8%25B0%2F"
+              class="btn btn--twitter"
+              onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
+              title="공유하기 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fflutter%2FFlutter%25EB%25A1%259C-%25EA%25B2%258C%25EC%259E%2584-%25EB%25A7%258C%25EB%2593%25A4%25EA%25B8%25B0%2F"
+              class="btn btn--facebook"
+              onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
+              title="공유하기 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fflutter%2FFlutter%25EB%25A1%259C-%25EA%25B2%258C%25EC%259E%2584-%25EB%25A7%258C%25EB%2593%25A4%25EA%25B8%25B0%2F"
+              class="btn btn--linkedin"
+              onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
+              title="공유하기 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+          </section>
+          <nav class="pagination">
+            <a href="/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/" class="pagination--pager" title="Python Object 쪼개보기
 ">이전</a>
-    
-    
-      <a href="/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/" class="pagination--pager" title="Python Gunicorn multiproessing 멈춤현상
+            <a href="/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/"
+              class="pagination--pager" title="Python Gunicorn multiproessing 멈춤현상
 ">다음</a>
-    
-  </nav>
-
-    </div>
-
-    
-  </article>
-
-  
-  
-    <div class="page__related">
-      <h4 class="page__related-title">참고</h4>
-      <div class="grid__wrapper">
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title no_toc" itemprop="headline">
-      
-        <a href="/python/Celery-UnlockChord-Bug-Debug/" rel="permalink">Celery UnlockChord Bug Debug
-</a>
-      
-    </h2>
-    
-
-  <p class="page__meta">
-    
-
-    
-
-    
-      
-      
-
-      <span class="page__meta-readtime">
-        <i class="far fa-clock" aria-hidden="true"></i>
-        
-          4 분 소요
-        
-      </span>
-    
-  </p>
-
-
-    <p class="archive__item-excerpt" itemprop="description">Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그
-
-</p>
-  </article>
-</div>
-
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title no_toc" itemprop="headline">
-      
-        <a href="/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/" rel="permalink">Python Gunicorn multiproessing 멈춤현상
-</a>
-      
-    </h2>
-    
-
-  <p class="page__meta">
-    
-
-    
-
-    
-      
-      
-
-      <span class="page__meta-readtime">
-        <i class="far fa-clock" aria-hidden="true"></i>
-        
-          1 분 소요
-        
-      </span>
-    
-  </p>
-
-
-    <p class="archive__item-excerpt" itemprop="description">gunicorn으로 multiprocessing.pool을 이용할 때, sub processs에서 에러 발생시, 해당 요청이 프리징이 걸리는 현상에 대한 확인
-
-</p>
-  </article>
-</div>
-
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title no_toc" itemprop="headline">
-      
-        <a href="/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/" rel="permalink">Python Object 쪼개보기
-</a>
-      
-    </h2>
-    
-
-  <p class="page__meta">
-    
-
-    
-
-    
-      
-      
-
-      <span class="page__meta-readtime">
-        <i class="far fa-clock" aria-hidden="true"></i>
-        
-          9 분 소요
-        
-      </span>
-    
-  </p>
-
-
-    <p class="archive__item-excerpt" itemprop="description">Python Object 쪼개보기
-
-</p>
-  </article>
-</div>
-
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title no_toc" itemprop="headline">
-      
-        <a href="/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/" rel="permalink">ext_storage not found 문제 해결
-</a>
-      
-    </h2>
-    
-
-  <p class="page__meta">
-    
-
-    
-
-    
-      
-      
-
-      <span class="page__meta-readtime">
-        <i class="far fa-clock" aria-hidden="true"></i>
-        
-          최대 1 분 소요
-        
-      </span>
-    
-  </p>
-
-
-    <p class="archive__item-excerpt" itemprop="description">module 'ext_storage' not found 해결
-
-</p>
-  </article>
-</div>
-
-        
+          </nav>
+        </div>
+      </article>
+      <div class="page__related">
+        <h4 class="page__related-title">참고</h4>
+        <div class="grid__wrapper">
+          <div class="grid__item">
+            <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+              <h2 class="archive__item-title no_toc" itemprop="headline">
+                <a href="/python/Celery-UnlockChord-Bug-Debug/" rel="permalink">Celery UnlockChord Bug Debug </a>
+              </h2>
+              <p class="page__meta">
+                <span class="page__meta-readtime">
+                  <i class="far fa-clock" aria-hidden="true"></i> 4 분 소요 </span>
+              </p>
+              <p class="archive__item-excerpt" itemprop="description">Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우,
+                unlock_chord 에러가 무한루프로 발생하는 버그 디버그 </p>
+            </article>
+          </div>
+          <div class="grid__item">
+            <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+              <h2 class="archive__item-title no_toc" itemprop="headline">
+                <a href="/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/"
+                  rel="permalink">Python Gunicorn multiproessing 멈춤현상 </a>
+              </h2>
+              <p class="page__meta">
+                <span class="page__meta-readtime">
+                  <i class="far fa-clock" aria-hidden="true"></i> 1 분 소요 </span>
+              </p>
+              <p class="archive__item-excerpt" itemprop="description">gunicorn으로 multiprocessing.pool을 이용할 때, sub
+                processs에서 에러 발생시, 해당 요청이 프리징이 걸리는 현상에 대한 확인 </p>
+            </article>
+          </div>
+          <div class="grid__item">
+            <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+              <h2 class="archive__item-title no_toc" itemprop="headline">
+                <a href="/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/" rel="permalink">Python Object 쪼개보기
+                </a>
+              </h2>
+              <p class="page__meta">
+                <span class="page__meta-readtime">
+                  <i class="far fa-clock" aria-hidden="true"></i> 9 분 소요 </span>
+              </p>
+              <p class="archive__item-excerpt" itemprop="description">Python Object 쪼개보기 </p>
+            </article>
+          </div>
+          <div class="grid__item">
+            <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+              <h2 class="archive__item-title no_toc" itemprop="headline">
+                <a href="/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/"
+                  rel="permalink">ext_storage not found 문제 해결 </a>
+              </h2>
+              <p class="page__meta">
+                <span class="page__meta-readtime">
+                  <i class="far fa-clock" aria-hidden="true"></i> 최대 1 분 소요 </span>
+              </p>
+              <p class="archive__item-excerpt" itemprop="description">module 'ext_storage' not found 해결 </p>
+            </article>
+          </div>
+        </div>
       </div>
     </div>
-  
-  
-</div>
-
-    </div>
-
-    
-
-    <div id="footer" class="page__footer">
-      <footer>
-        <!-- start custom footer snippets -->
-
-<!-- end custom footer snippets -->
-        <div class="page__footer-follow">
-  <ul class="social-icons">
-    
-      <li><strong>팔로우:</strong></li>
-    
-
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-
-    
-      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> 피드</a></li>
-    
-  </ul>
-</div>
-
-<div class="page__footer-copyright">&copy; 2024 paca94. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
-
-      </footer>
-    </div>
-
-    
+  </div>
+  <div id="footer" class="page__footer">
+    <footer>
+      <!-- start custom footer snippets -->
+      <!-- end custom footer snippets -->
+      <div class="page__footer-follow">
+        <ul class="social-icons">
+          <li><strong>팔로우:</strong></li>
+          <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> 피드</a></li>
+        </ul>
+      </div>
+      <div class="page__footer-copyright">&copy; 2024 paca94. Powered by <a href="https://jekyllrb.com"
+          rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/"
+          rel="nofollow">Minimal Mistakes</a>.</div>
+    </footer>
+  </div>
   <script src="/assets/js/main.min.js"></script>
+</body>
 
-
-
-
-
-
-
-
-
-
-  </body>
 </html>
