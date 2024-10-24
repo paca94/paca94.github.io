@@ -6,44 +6,87 @@
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
 -->
 <html lang="ko" class="no-js">
+  <head>
+    <meta charset="utf-8">
 
-<head>
-  <meta charset="utf-8">
-  <!-- begin _includes/seo.html -->
-  <title>Python Object 쪼개보기 &amp;#124 paca94 Develop Blog</title>
-  <meta name="description" content="CPython을 까보고 Python Object는 어떻게 동작하는지 알아본다">
+<!-- begin _includes/seo.html --><title>Python Object 쪼개보기 &amp;#124 paca94 Develop Blog</title>
+<meta name="description" content="CPython을 까보고 Python Object는 어떻게 동작하는지 알아본다">
+
+
   <meta name="author" content="paca94">
+  
   <meta property="article:author" content="paca94">
-  <meta property="og:type" content="article">
-  <meta property="og:locale" content="ko_KR">
-  <meta property="og:site_name" content="paca94 Develop Blog">
-  <meta property="og:title" content="Python Object 쪼개보기">
-  <meta property="og:url" content="https://paca94.github.io/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="paca94 Develop Blog">
+<meta property="og:title" content="Python Object 쪼개보기">
+<meta property="og:url" content="http://localhost:4000/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/">
+
+
   <meta property="og:description" content="CPython을 까보고 Python Object는 어떻게 동작하는지 알아본다">
+
+
+
+
+
+
+
   <meta property="article:published_time" content="2022-03-09T00:00:00+09:00">
+
+
+
   <meta property="article:modified_time" content="2022-03-10T07:26:00+09:00">
-  <link rel="canonical" href="https://paca94.github.io/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/">
-  <script type="application/ld+json">
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/">
+
+
+
+
+<script type="application/ld+json">
   {
     "@context": "https://schema.org",
-
+    
       "@type": "Person",
       "name": "paca94",
-      "url": "https://paca94.github.io/"
-
+      "url": "http://localhost:4000/"
+    
   }
 </script>
-  <!-- end _includes/seo.html -->
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
   <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="paca94 Develop Blog Feed">
-  <!-- https://t.co/dKP3o1e -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script>
-    document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
-  </script>
-  <!-- For all browsers -->
-  <link rel="stylesheet" href="/assets/css/main.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
-  <!--[if IE]>
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
   <style>
     /* old IE unsupported flexbox fixes */
     .greedy-nav .site-title {
@@ -57,176 +100,281 @@
     }
   </style>
 <![endif]-->
-  <!-- start custom head snippets -->
-  <!-- insert favicons. use https://realfavicongenerator.net/ -->
-  <!-- end custom head snippets -->
-</head>
 
-<body class="layout--single">
-  <nav class="skip-links">
-    <h2 class="screen-reader-text">Skip links</h2>
-    <ul>
-      <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
-      <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
-      <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
-    </ul>
-  </nav>
-  <!--[if lt IE 9]>
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
 <div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
 <![endif]-->
-  <div class="masthead">
-    <div class="masthead__inner-wrap">
-      <div class="masthead__menu">
-        <nav id="site-nav" class="greedy-nav">
-          <a class="site-title" href="/"> 즐기는 개발자 <span class="site-subtitle">Version 1.0</span>
-          </a>
-          <ul class="visible-links">
-            <li class="masthead__menu-item">
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          즐기는 개발자
+          <span class="site-subtitle">Version 1.0</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
               <a href="/categories/">Categories</a>
-            </li>
-            <li class="masthead__menu-item">
+            </li><li class="masthead__menu-item">
               <a href="/tags/">Tags</a>
-            </li>
-            <li class="masthead__menu-item">
+            </li><li class="masthead__menu-item">
               <a href="/about/">About</a>
-            </li>
-            <li class="masthead__menu-item">
+            </li><li class="masthead__menu-item">
               <a href="/posts/">연도별 포스트</a>
-            </li>
-          </ul>
-          <button class="greedy-nav__toggle hidden" type="button">
-            <span class="visually-hidden">토글 메뉴</span>
-            <div class="navicon"></div>
-          </button>
-          <ul class="hidden-links hidden"></ul>
-        </nav>
-      </div>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">토글 메뉴</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
     </div>
   </div>
-  <div class="initial-content">
-    <nav class="breadcrumbs">
-      <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+  
+    
+
+
+
+<nav class="breadcrumbs">
+  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+    
+    
+    
+      
         <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-          <a href="https://paca94.github.io/" itemprop="item"><span itemprop="name">Home</span></a>
+          <a href="http://localhost:4000/" itemprop="item"><span itemprop="name">Home</span></a>
           <meta itemprop="position" content="1" />
         </li>
         <span class="sep">/</span>
+      
+      
+        
         <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
           <a href="/categories/#python" itemprop="item"><span itemprop="name">Python</span></a>
           <meta itemprop="position" content="2" />
         </li>
         <span class="sep">/</span>
+      
+    
+      
+      
         <li class="current">Python Object 쪼개보기</li>
-      </ol>
-    </nav>
-    <div id="main" role="main">
-      <div class="sidebar sticky">
-        <div itemscope itemtype="https://schema.org/Person">
-          <div class="author__content">
-            <h3 class="author__name" itemprop="name">paca94</h3>
-            <div class="author__bio" itemprop="description">
-              <p>고민이 생기고 해당 고민에 대해 어떤 결과를 도출해내는지 써내려가는 블로그입니다.<br />여러가지 의견은 언제나 환영입니다!</p>
-            </div>
-          </div>
-          <div class="author__urls-wrapper">
-            <button class="btn btn--inverse">팔로우</button>
-            <ul class="author__urls social-icons">
-              <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
-                <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Republic Of Korea.
-                  Seooul</span>
-              </li>
-              <li><a href="mailto:jihwan.dev@gmail.com" rel="nofollow noopener noreferrer"><i
-                    class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span></a>
-              </li>
-              <li><a href="https://github.com/paca94" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github"
-                    aria-hidden="true"></i><span class="label">GitHub</span></a></li>
-              <li>
-                <a href="mailto:jihwan.dev@gmail.com">
-                  <meta itemprop="email" content="jihwan.dev@gmail.com" />
-                  <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">이메일</span>
-                </a>
-              </li>
-              <!--
+      
+    
+  </ol>
+</nav>
+
+  
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">paca94</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>고민이 생기고 해당 고민에 대해 어떤 결과를 도출해내는지 써내려가는 블로그입니다.<br />여러가지 의견은 언제나 환영입니다!</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">팔로우</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Republic Of Korea. Daejeon</span>
+        </li>
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://github.com/paca94" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+          
+        
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:jihwan.dev@gmail.com">
+            <meta itemprop="email" content="jihwan.dev@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">이메일</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
   <li>
     <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
       <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
     </a>
   </li>
 -->
-            </ul>
-          </div>
-        </div>
-      </div>
-      <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-        <meta itemprop="headline" content="Python Object 쪼개보기">
-        <meta itemprop="description" content="Python Object 쪼개보기">
-        <meta itemprop="datePublished" content="2022-03-09T00:00:00+09:00">
-        <meta itemprop="dateModified" content="2022-03-10T07:26:00+09:00">
-        <div class="page__inner-wrap">
-          <header>
-            <h1 id="page-title" class="page__title" itemprop="headline">Python Object 쪼개보기 </h1>
-            <p class="page__meta">
-              <span class="page__meta-readtime">
-                <i class="far fa-clock" aria-hidden="true"></i> 9 분 소요 </span>
-            </p>
-          </header>
-          <section class="page__content" itemprop="text">
-            <aside class="sidebar__right sticky">
-              <nav class="toc">
-                <header>
-                  <h4 class="nav__title"><i class="fas fa-file-alt"></i> 목차</h4>
-                </header>
-                <ul class="toc__menu">
-                  <li><a href="#찾아본-이유">찾아본 이유</a></li>
-                  <li><a href="#python-dictionary는-무엇인가">Python Dictionary는 무엇인가?</a>
-                    <ul>
-                      <li><a href="#memory-layout">memory Layout</a>
-                        <ul>
-                          <li><a href="#_dictkeysobject">_dictkeysobject</a></li>
-                          <li><a href="#_dictvalues">_dictvalues</a></li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </li>
-                  <li><a href="#파이썬-해시함수">파이썬 해시함수</a></li>
-                  <li><a href="#충돌">충돌</a></li>
-                  <li><a href="#증가-비율">증가 비율</a>
-                    <ul>
-                      <li><a href="#딕-사이즈-계산">딕 사이즈 계산</a>
-                        <ul>
-                          <li><a href="#프리사이즈">프리사이즈</a></li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </li>
-                  <li><a href="#pydict_getitem">PyDict_GetItem</a></li>
-                </ul>
-                </li>
-                <li><a href="#resize">resize</a></li>
-                </ul>
-              </nav>
-            </aside>
-            <div class="language-yaml highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code><span class="s">Python Object 쪼개보기</span>
-</code></pre>
-              </div>
-            </div>
-            <h1 id="찾아본-이유">찾아본 이유</h1>
-            <p>이번에 이직한 회사에서 Python을 쓰고 있는데, Dictionary 자료형의 기본크기는 몇이며, 얘는 어떻게 동작하고 그리고 크기 증가 전략은 어떤것인지 궁금해서 알아보게 되었다.
-            </p>
-            <h1 id="python-dictionary는-무엇인가">Python Dictionary는 무엇인가?</h1>
-            <p>CPython Repo =&gt; Objects/dictobject.c line 1</p>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>Dictionary object implementation using a hash table
-</code></pre>
-              </div>
-            </div>
-            <h2 id="memory-layout">memory Layout</h2>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>+---------------------+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Python Object 쪼개보기">
+    <meta itemprop="description" content="Python Object 쪼개보기">
+    <meta itemprop="datePublished" content="2022-03-09T00:00:00+09:00">
+    <meta itemprop="dateModified" content="2022-03-10T07:26:00+09:00">
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Python Object 쪼개보기
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          9 분 소요
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> 목차</h4></header>
+              <ul class="toc__menu"><li><a href="#찾아본-이유">찾아본 이유</a></li><li><a href="#python-dictionary는-무엇인가">Python Dictionary는 무엇인가?</a><ul><li><a href="#memory-layout">memory Layout</a><ul><li><a href="#_dictkeysobject">_dictkeysobject</a></li><li><a href="#_dictvalues">_dictvalues</a></li></ul></li></ul></li><li><a href="#파이썬-해시함수">파이썬 해시함수</a></li><li><a href="#충돌">충돌</a></li><li><a href="#증가-비율">증가 비율</a><ul><li><a href="#딕-사이즈-계산">딕 사이즈 계산</a><ul><li><a href="#프리사이즈">프리사이즈</a></li></ul></li></ul></li><li><a href="#pydict_getitem">PyDict_GetItem</a></li></ul></li><li><a href="#resize">resize</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Python Object 쪼개보기</span>
+</code></pre></div></div>
+
+<h1 id="찾아본-이유">찾아본 이유</h1>
+<p>이번에 이직한 회사에서 Python을 쓰고 있는데, Dictionary 자료형의 기본크기는 몇이며, 얘는 어떻게 동작하고 그리고 크기 증가 전략은 어떤것인지 궁금해서 알아보게 되었다.</p>
+
+<h1 id="python-dictionary는-무엇인가">Python Dictionary는 무엇인가?</h1>
+<p>CPython Repo =&gt; Objects/dictobject.c line 1</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Dictionary object implementation using a hash table
+</code></pre></div></div>
+
+<h2 id="memory-layout">memory Layout</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+---------------------+
 | dk_refcnt           |
 | dk_log2_size        |
 | dk_log2_index_bytes |
@@ -240,70 +388,90 @@
 | dk_entries[]        |
 |                     |
 +---------------------+
-</code></pre>
-              </div>
-            </div>
-            <p>dk_indices=&gt; 엔트리에 있는 데이터의 위치값이 저장되어 있음. 배열에는 실제 데이터, DKIX_EMPTY(-1) or DKIX_DUMMY(-2) 중 하나가 들어가 있음.
-              가득차면 2배로 증가. 실제해시테이블 사이즈</p>
-            <h3 id="_dictkeysobject">_dictkeysobject</h3>
-            <p>dk_refcnt =&gt; gc용 레퍼카운터인듯.<br /> dk_log2_size =&gt; 해시테이블(indices) 크기. 2의 지수배로 증가함.<br />
-              dk_log2_index_bytes =&gt; 해시테이블 바이트사이즈<br /> dk_kind =&gt; 키 종류<br /> dk_version =&gt; 버전값. 어떤 키값이 수정되면
-              0으로 수정함.<br /> dk_usable =&gt; 사용가능한 entries 공간크기.<br /> dk_nentries =&gt; 실제 사용하고있는 entries 공간 크기<br />
-              dk_indices =&gt; 인덱스가 저장되는 실제 배열.</p>
-            <ul>
-              <li>상세 &gt; char dk_indices[]; /* char is required to avoid strict aliasing. */</li>
-            </ul>
-            <h3 id="_dictvalues">_dictvalues</h3>
-            <p>/* Layout of dict values: *</p>
-            <ul>
-              <li>The PyObject *values are preceded by an array of bytes holding</li>
-              <li>the insertion order and size.</li>
-              <li>[-1] = prefix size. [-2] = used size. size[-2-n…] = insertion order. */ struct _dictvalues { PyObject
-                *values[1]; };</li>
-            </ul>
-            <p>Size of indices is dk_size. Type of each index in indices is vary on dk_size:</p>
-            <ul>
-              <li>int8 for dk_size &lt;= 128</li>
-              <li>int16 for 256 &lt;= dk_size &lt;= 2**15</li>
-              <li>int32 for 2<strong>16 &lt;= dk_size &lt;= 2</strong>31</li>
-              <li>int64 for 2**32 &lt;= dk_size</li>
-            </ul>
-            <h1 id="파이썬-해시함수">파이썬 해시함수</h1>
-            <p>해시함수는 일반적으로 랜덤성이 좋아야 좋음. 하지만, 파이썬에서는 인트에대해선 규칙적임. (확인해보니, 1=&gt;1 2=&gt;2 이런식으로 나옴.)</p>
-            <h1 id="충돌">충돌</h1>
-            <p>해시값 충돌시, 아래 알고리즘을 통해 다음에 저장될 인덱스를 지정함.</p>
-            <p>만약, 선형 프로빙으로 저장한다면, 인덱스가 연속될경우, 치명적임.</p>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>j = ((5*j) + 1) mod 2**i
-</code></pre>
-              </div>
-            </div>
-            <p>따라서, 연속적인 인덱스에 저장하지 않고, 아래 알고리즘을 통해 다음인덱스를 결정함.</p>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>perturb &gt;&gt;= PERTURB_SHIFT;
+</code></pre></div></div>
+<p>dk_indices=&gt;  엔트리에 있는 데이터의 위치값이 저장되어 있음. 배열에는 실제 데이터, DKIX_EMPTY(-1) or DKIX_DUMMY(-2) 중 하나가 들어가 있음. 가득차면 2배로 증가. 실제해시테이블 사이즈</p>
+
+<h3 id="_dictkeysobject">_dictkeysobject</h3>
+
+<p>dk_refcnt =&gt; gc용 레퍼카운터인듯.<br />
+dk_log2_size =&gt; 해시테이블(indices) 크기. 2의 지수배로 증가함.<br />
+dk_log2_index_bytes =&gt; 해시테이블 바이트사이즈<br />
+dk_kind =&gt; 키 종류<br />
+dk_version =&gt; 버전값. 어떤 키값이 수정되면 0으로 수정함.<br />
+dk_usable =&gt; 사용가능한 entries 공간크기.<br />
+dk_nentries =&gt; 실제 사용하고있는 entries 공간 크기<br />
+dk_indices =&gt; 인덱스가 저장되는 실제 배열.</p>
+<ul>
+  <li>상세 &gt; char dk_indices[];  /* char is required to avoid strict aliasing. */</li>
+</ul>
+
+<h3 id="_dictvalues">_dictvalues</h3>
+<p>/* Layout of dict values:
+ *</p>
+<ul>
+  <li>The PyObject *values are preceded by an array of bytes holding</li>
+  <li>the insertion order and size.</li>
+  <li>[-1] = prefix size. [-2] = used size. size[-2-n…] = insertion order.
+ */
+struct _dictvalues {
+ PyObject *values[1];
+};</li>
+</ul>
+
+<p>Size of indices is dk_size.  Type of each index in indices is vary on dk_size:</p>
+
+<ul>
+  <li>int8  for          dk_size &lt;= 128</li>
+  <li>int16 for 256   &lt;= dk_size &lt;= 2**15</li>
+  <li>int32 for 2<strong>16 &lt;= dk_size &lt;= 2</strong>31</li>
+  <li>int64 for 2**32 &lt;= dk_size</li>
+</ul>
+
+<h1 id="파이썬-해시함수">파이썬 해시함수</h1>
+<p>해시함수는 일반적으로 랜덤성이 좋아야 좋음.
+하지만, 파이썬에서는 인트에대해선 규칙적임. (확인해보니, 1=&gt;1 2=&gt;2 이런식으로 나옴.)</p>
+
+<h1 id="충돌">충돌</h1>
+<p>해시값 충돌시, 아래 알고리즘을 통해 다음에 저장될 인덱스를 지정함.</p>
+
+<p>만약, 선형 프로빙으로 저장한다면, 인덱스가 연속될경우, 치명적임.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>j = ((5*j) + 1) mod 2**i
+</code></pre></div></div>
+
+<p>따라서, 연속적인 인덱스에 저장하지 않고, 아래 알고리즘을 통해 다음인덱스를 결정함.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>perturb &gt;&gt;= PERTURB_SHIFT;
 j = (5*j) + 1 + perturb;
 use j % 2**i as the next table index;
-</code></pre>
-              </div>
-            </div>
-            <h1 id="증가-비율">증가 비율</h1>
-            <p>/* GROWTH_RATE. Growth rate upon hitting maximum load.</p>
-            <ul>
-              <li>Currently set to used*3.</li>
-              <li>This means that dicts double in size when growing without deletions,</li>
-              <li>but have more head room when the number of deletions is on a par with the</li>
-              <li>number of insertions. See also bpo-17563 and bpo-33205. *</li>
-              <li>GROWTH_RATE was set to used*4 up to version 3.2.</li>
-              <li>GROWTH_RATE was set to used*2 in version 3.3.0</li>
-              <li>GROWTH_RATE was set to used*2 + capacity/2 in 3.4.0-3.6.0. */</li>
-            </ul>
-            <p>/* Number of items in the dictionary <em>/ #define GROWTH_RATE(d) ((d)-&gt;ma_used</em>3)</p>
-            <p># 클리어시킬때 This immutable, empty PyDictKeysObject is used for PyDict_Clear() 빈거가져다가씀?</p>
-            <p># 인덱스 룩업</p>
-            <p>index =&gt; 해당 키값이 저장된 위치 ( 충돌여부 안보고 해당위치 일단찾음) hash =&gt; 해당 키값 해쉬돌린 결과값 비었으면 -1임. ( DKIX_EMPTY )</p>
-            <pre><code class="language-C">static Py_ssize_t
+</code></pre></div></div>
+
+<h1 id="증가-비율">증가 비율</h1>
+
+<p>/* GROWTH_RATE. Growth rate upon hitting maximum load.</p>
+<ul>
+  <li>Currently set to used*3.</li>
+  <li>This means that dicts double in size when growing without deletions,</li>
+  <li>but have more head room when the number of deletions is on a par with the</li>
+  <li>number of insertions.  See also bpo-17563 and bpo-33205.
+ *</li>
+  <li>GROWTH_RATE was set to used*4 up to version 3.2.</li>
+  <li>GROWTH_RATE was set to used*2 in version 3.3.0</li>
+  <li>GROWTH_RATE was set to used*2 + capacity/2 in 3.4.0-3.6.0.
+ */</li>
+</ul>
+
+<p>/* Number of items in the dictionary <em>/
+ #define GROWTH_RATE(d) ((d)-&gt;ma_used</em>3)</p>
+
+<p># 클리어시킬때
+ This immutable, empty PyDictKeysObject is used for PyDict_Clear()
+ 빈거가져다가씀?</p>
+
+<p># 인덱스 룩업</p>
+
+<p>index =&gt; 해당 키값이 저장된 위치 ( 충돌여부 안보고 해당위치 일단찾음)
+hash =&gt; 해당 키값 해쉬돌린 결과값
+비었으면 -1임. ( DKIX_EMPTY )</p>
+<pre><code class="language-C">static Py_ssize_t
 lookdict_index(PyDictKeysObject *k, Py_hash_t hash, Py_ssize_t index)
 {
     size_t mask = DK_MASK(k);
@@ -324,34 +492,57 @@ lookdict_index(PyDictKeysObject *k, Py_hash_t hash, Py_ssize_t index)
     Py_UNREACHABLE();
 }
 </code></pre>
-            <p>딕셔너리는 키, 값, 사용하고있는 공간값, 버전정보 ( 해당값은 해시테이블 만들어지거나 값이 수정될때증가? )</p>
-            <p>insertdict insert_to_emptydict</p>
-            <p>버전갱신이유 ? 왜 ?</p>
-            <p>/* USABLE_FRACTION is the maximum dictionary load.</p>
-            <ul>
-              <li>Increasing this ratio makes dictionaries more dense resulting in more</li>
-              <li>collisions. Decreasing it improves sparseness at the expense of spreading</li>
-              <li>indices over more cache lines and at the cost of total memory consumed. *</li>
-              <li>USABLE_FRACTION must obey the following:</li>
-              <li>(0 &lt; USABLE_FRACTION(n) &lt; n) for all n &gt;= 2 *</li>
-              <li>USABLE_FRACTION should be quick to calculate.</li>
-              <li>Fractions around 1/2 to 2/3 seem to work well in practice. */ #define USABLE_FRACTION(n) (((n) « 1)/3)
-              </li>
-            </ul>
-            <h3 id="딕-사이즈-계산">딕 사이즈 계산</h3>
-            <h4 id="프리사이즈">프리사이즈</h4>
-            <p>PyDict_LOG_MINSIZE == 3 ? 2 « 3 할 경우, 8임. 딕 사이즈는 기본 8 반환</p>
-            <p>max presize =&gt; 2^(17 + 1)임. 아이템 개수가 2^(17+1) * 2 / 3보다 크면, 그냥 크기를 2^17 사용 넘지않을경우, 사이즈대로 반환 =&gt; (크기 *
-              3 +1) / 2 (크기 아이템 미리할당)</p>
-            <p>log2_size =&gt; 지수사이즈 ?</p>
-            <p>_Py_bit_length &gt; 현재값보다 크고 가장 가까운 지수 구함. (사용사이즈 * 3 + 1) / 2 &lt; 2^x 지수를 구해야함.</p>
-            <p>ex) 1, 2 &lt; 2^x, x = 2 =&gt; 2 2, 3.5 &lt; 2^x, x = 2 =&gt; 2</p>
-            <p>10, 15.5 &lt; 2^x, x = 4 =&gt; 4</p>
-            <p>entry_size =&gt; 유니코드 키값일경우, PyObject * 2 포인터 =&gt; 그외값, PyObject * 2 포인터 + 파이썬 기본사이즈(?)</p>
-            <p>log2_bytes =&gt;</p>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>    if (log2_size &lt; 8) {
+
+<p>딕셔너리는 키, 값, 사용하고있는 공간값, 버전정보 ( 해당값은 해시테이블 만들어지거나 값이 수정될때증가? )</p>
+
+<p>insertdict
+insert_to_emptydict</p>
+
+<p>버전갱신이유 ? 왜 ?</p>
+
+<p>/* USABLE_FRACTION is the maximum dictionary load.</p>
+<ul>
+  <li>Increasing this ratio makes dictionaries more dense resulting in more</li>
+  <li>collisions.  Decreasing it improves sparseness at the expense of spreading</li>
+  <li>indices over more cache lines and at the cost of total memory consumed.
+ *</li>
+  <li>USABLE_FRACTION must obey the following:</li>
+  <li>(0 &lt; USABLE_FRACTION(n) &lt; n) for all n &gt;= 2
+ *</li>
+  <li>USABLE_FRACTION should be quick to calculate.</li>
+  <li>Fractions around 1/2 to 2/3 seem to work well in practice.
+ */
+#define USABLE_FRACTION(n) (((n) « 1)/3)</li>
+</ul>
+
+<h3 id="딕-사이즈-계산">딕 사이즈 계산</h3>
+
+<h4 id="프리사이즈">프리사이즈</h4>
+<p>PyDict_LOG_MINSIZE == 3 ? 2 « 3 할 경우, 8임.
+딕 사이즈는 기본 8 반환</p>
+
+<p>max presize =&gt; 2^(17 + 1)임.
+아이템 개수가 2^(17+1) * 2 / 3보다 크면, 그냥 크기를 2^17 사용
+넘지않을경우, 사이즈대로 반환 =&gt; (크기 * 3 +1) / 2
+(크기 아이템 미리할당)</p>
+
+<p>log2_size =&gt; 지수사이즈 ?</p>
+
+<p>_Py_bit_length &gt; 현재값보다 크고 가장 가까운 지수 구함.
+(사용사이즈 * 3 + 1) / 2 &lt; 2^x
+지수를 구해야함.</p>
+
+<p>ex)
+1, 2 &lt; 2^x, x = 2 =&gt; 2
+2, 3.5 &lt; 2^x, x = 2 =&gt; 2</p>
+
+<p>10, 15.5 &lt; 2^x, x = 4 =&gt; 4</p>
+
+<p>entry_size =&gt; 유니코드 키값일경우, PyObject * 2 포인터
+            =&gt; 그외값, PyObject * 2 포인터 + 파이썬 기본사이즈(?)</p>
+
+<p>log2_bytes =&gt;</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    if (log2_size &lt; 8) {
         log2_bytes = log2_size;
     }
     else if (log2_size &lt; 16) {
@@ -365,16 +556,16 @@ lookdict_index(PyDictKeysObject *k, Py_hash_t hash, Py_ssize_t index)
     else {
         log2_bytes = log2_size + 2;
     }
-</code></pre>
-              </div>
-            </div>
-            <p>usable =&gt; USABLE_FRACTION(1«log2_size);</p>
-            <p>최종 사이즈 ? dk = PyObject_Malloc(sizeof(PyDictKeysObject) + ((size_t)1 « log2_bytes) + entry_size * usable);
-            </p>
-            <p>최종.</p>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>    dk-&gt;dk_refcnt = 1;
+</code></pre></div></div>
+<p>usable =&gt; USABLE_FRACTION(1«log2_size);</p>
+
+<p>최종 사이즈 ? 
+        dk = PyObject_Malloc(sizeof(PyDictKeysObject)
+                             + ((size_t)1 « log2_bytes)
+                             + entry_size * usable);</p>
+
+<p>최종.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    dk-&gt;dk_refcnt = 1;
     dk-&gt;dk_log2_size = log2_size;
     dk-&gt;dk_log2_index_bytes = log2_bytes;
     dk-&gt;dk_kind = unicode ? DICT_KEYS_UNICODE : DICT_KEYS_GENERAL;
@@ -384,13 +575,10 @@ lookdict_index(PyDictKeysObject *k, Py_hash_t hash, Py_ssize_t index)
     memset(&amp;dk-&gt;dk_indices[0], 0xff, ((size_t)1 &lt;&lt; log2_bytes));
     memset(&amp;dk-&gt;dk_indices[(size_t)1 &lt;&lt; log2_bytes], 0, entry_size * usable);
     return dk;
-</code></pre>
-              </div>
-            </div>
-            <p>비어있을경우 기본 키 형태</p>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>
+</code></pre></div></div>
+
+<p>비어있을경우 기본 키 형태</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 static PyDictKeysObject empty_keys_struct = {
         1, /* dk_refcnt */
         0, /* dk_log2_size */
@@ -403,14 +591,12 @@ static PyDictKeysObject empty_keys_struct = {
          DKIX_EMPTY, DKIX_EMPTY, DKIX_EMPTY, DKIX_EMPTY}, /* dk_indices */
 };
 
-</code></pre>
-              </div>
-            </div>
-            <p>파이썬 메모리 할당시, 오브젝트 기본 사이즈 + 타입을 위한 사이즈 만큼 잡고, gc에는 타입을 위한 사이즈 위치에 대해 링크를 검(?)</p>
-            <p>gc head</p>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>typedef struct {
+</code></pre></div></div>
+
+<p>파이썬 메모리 할당시, 오브젝트 기본 사이즈 + 타입을 위한 사이즈 만큼 잡고, gc에는 타입을 위한 사이즈 위치에 대해 링크를 검(?)</p>
+
+<p>gc head</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>typedef struct {
     // Pointer to next object in the list.
     // 0 means the object is not tracked
     uintptr_t _gc_next;
@@ -419,13 +605,10 @@ static PyDictKeysObject empty_keys_struct = {
     // Lowest two bits are used for flags documented later.
     uintptr_t _gc_prev;
 } PyGC_Head;
-</code></pre>
-              </div>
-            </div>
-            <p>gc가 안돌고 있다면, young 세대의 한계점의 개수가 현재 개수보다 많다면, gc돔. 대충이정도만 알면될듯?</p>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>void
+</code></pre></div></div>
+
+<p>gc가 안돌고 있다면, young 세대의 한계점의 개수가 현재 개수보다 많다면, gc돔. 대충이정도만 알면될듯?</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>void
 _PyObject_GC_Link(PyObject *op)
 {
     PyGC_Head *g = AS_GC(op);
@@ -447,16 +630,18 @@ _PyObject_GC_Link(PyObject *op)
         gcstate-&gt;collecting = 0;
     }
 }
-</code></pre>
-              </div>
-            </div>
-            <p>오브젝트를 만들때마다 gc를 돌릴지 체크함. 즉, 주기적으로 도는게아니란뜻.</p>
-            <p>메모리 할당 실패했을경우, 할당해둔 key들 밀어버림.</p>
-            <p>파이썬에서 dict은 삭제하면 현재 프리갯수가 80개 이하라면, 그곳에 저장하고, 80개가 넘어가면 free해버림.</p>
-            <p>배열로서, 스택형태로 되어있음.</p>
-            <div class="language-python highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>오브젝트를 만들때마다 gc를 돌릴지 체크함.
+즉, 주기적으로 도는게아니란뜻.</p>
+
+<p>메모리 할당 실패했을경우, 할당해둔 key들 밀어버림.</p>
+
+<p>파이썬에서 dict은 삭제하면 현재 프리갯수가 80개 이하라면, 그곳에 저장하고, 80개가 넘어가면 free해버림.</p>
+
+<p>배열로서, 스택형태로 되어있음.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 <span class="mi">4379980224</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">del</span> <span class="n">d</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
@@ -495,48 +680,51 @@ _PyObject_GC_Link(PyObject *op)
 <span class="mi">4379980352</span>
 
 
-</code></pre>
-              </div>
-            </div>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>* There are no strict guarantee that returned dict can contain minused
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* There are no strict guarantee that returned dict can contain minused
 * items without resize.  So we create medium size dict instead of very
 * large dict or MemoryError.
-</code></pre>
-              </div>
-            </div>
-            <h2 id="pydict_getitem">PyDict_GetItem</h2>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>Note that, for historical reasons, PyDict_GetItem() suppresses all errors that may occur (originally dicts supported only string keys, and exceptions weren't possible).  So, while the original intent was that a NULL return meant the key wasn't present, in reality it can mean that, or that an error (suppressed) occurred while computing the key's hash, or that some error (suppressed) occurred when comparing keys in the dict's internal probe sequence.  A nasty example of the latter is when a Python-coded comparison function hits a stack-depth error, which can cause this to return NULL even if the key is present.
+</code></pre></div></div>
+
+<h2 id="pydict_getitem">PyDict_GetItem</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Note that, for historical reasons, PyDict_GetItem() suppresses all errors that may occur (originally dicts supported only string keys, and exceptions weren't possible).  So, while the original intent was that a NULL return meant the key wasn't present, in reality it can mean that, or that an error (suppressed) occurred while computing the key's hash, or that some error (suppressed) occurred when comparing keys in the dict's internal probe sequence.  A nasty example of the latter is when a Python-coded comparison function hits a stack-depth error, which can cause this to return NULL even if the key is present.
 
 
 역사적 이유로 PyDict_GetItem()은 발생할 수 있는 모든 오류를 억제합니다(원래 dicts는 문자열 키만 지원했으며 예외는 불가능했습니다). 따라서 원래 의도는 NULL 반환이 키가 없음을 의미하는 것이지만 실제로는 키의 해시를 계산하는 동안 오류(억제됨)가 발생했거나 비교할 때 일부 오류(억제됨)가 발생했음을 의미할 수 있습니다. dict의 내부 프로브 시퀀스에 있는 키. 후자의 불쾌한 예는 Python으로 코딩된 비교 함수가 스택 깊이 오류에 도달했을 때입니다. 이로 인해 키가 있더라도 NULL이 반환될 수 있습니다.
 
 
-</code></pre>
-              </div>
-            </div>
-            <p>키는 기본사이즈일경우에만 reuse 만약, 프리 키배열이 있다며 가져다가 ㅏㅅ용. 없으면 새로만듬.</p>
-            <p>유니코드뿐인 테이블에, 유니코드가 아닌 데이터가 추가된다면, resize</p>
-            <h1 id="resize">resize</h1>
-            <p>/* Restructure the table by allocating a new table and reinserting all items again. When entries have
-              been deleted, the new table may actually be smaller than the old one. If a table is split (its keys and
-              hashes are shared, its values are not), then the values are temporarily copied into the table, it is
-              resized as a combined table, then the me_value slots in the old table are NULLed out. After resizing a
-              table is always combined.</p>
-            <p>This function supports:</p>
-            <ul>
-              <li>Unicode split -&gt; Unicode combined or Generic</li>
-              <li>Unicode combined -&gt; Unicode combined or Generic</li>
-              <li>Generic -&gt; Generic */</li>
-            </ul>
-            <p>키값이</p>
-            <p>631</p>
-            <div class="language-c highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>    <span class="n">usable</span> <span class="o">=</span> <span class="n">USABLE_FRACTION</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">log2_size</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>키는 기본사이즈일경우에만 reuse
+만약, 프리 키배열이 있다며 가져다가 ㅏㅅ용. 없으면 새로만듬.</p>
+
+<p>유니코드뿐인 테이블에, 유니코드가 아닌 데이터가 추가된다면, resize</p>
+
+<h1 id="resize">resize</h1>
+
+<p>/*
+Restructure the table by allocating a new table and reinserting all
+items again.  When entries have been deleted, the new table may
+actually be smaller than the old one.
+If a table is split (its keys and hashes are shared, its values are not),
+then the values are temporarily copied into the table, it is resized as
+a combined table, then the me_value slots in the old table are NULLed out.
+After resizing a table is always combined.</p>
+
+<p>This function supports:</p>
+<ul>
+  <li>Unicode split -&gt; Unicode combined or Generic</li>
+  <li>Unicode combined -&gt; Unicode combined or Generic</li>
+  <li>Generic -&gt; Generic
+*/</li>
+</ul>
+
+<p>키값이</p>
+
+<p>631</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">usable</span> <span class="o">=</span> <span class="n">USABLE_FRACTION</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">log2_size</span><span class="p">);</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">log2_size</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">log2_bytes</span> <span class="o">=</span> <span class="n">log2_size</span><span class="p">;</span>
     <span class="p">}</span>
@@ -551,159 +739,378 @@ _PyObject_GC_Link(PyObject *op)
 </span>    <span class="k">else</span> <span class="p">{</span>
         <span class="n">log2_bytes</span> <span class="o">=</span> <span class="n">log2_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">;</span>
     <span class="p">}</span>
-</code></pre>
-              </div>
-            </div>
-            <p>1~7 ( min 3 ) 보면, log2_size가 2^7(128) 이하라면, indices와 entries 할당량이 동일함. 즉, 변경전과 동일함. 지수값이 7일 때, 실제 사용 가능한
-              크기는 85.3</p>
-            <ul>
-              <li>8~15 2^15 (32768) 이하라면, indices가 entires의 2배임.</li>
-            </ul>
-            <p>16~31</p>
-            <p>32~</p>
-            <p>지수값별 사용가능한 크기 | 지수 | indices 크기 | 사용가능 크기 / entries 크기 (2 ^ 지수 * 2 / 3) | | - | -| - | | - | -(2^지수)- | -
-              | | 3 | 8 | 5.3 | | 4 | 16 | 10.6 | | 5 | 32 | 21.3 | | 6 | 64 |42.6 | | 7 | 128 |85.3 | | - |
-              -(2^(지수+1))- | - | | 8 | 512 | 170.6 | | 9 | 1024 | 341.3 | | 10 | 2048 | 682.6 | | 11 | 4096 | 1365.3 | |
-              12 | 8192 | 2730.6 | | 13 | 16384 | 5461.3 | | 14 | 32768 | 10922.6 | | 15|65536 | 21845.3 | | - |
-              -(2^(지수+2))- | - | | 16 | 262144 | 43690.6 | | 17 | 524288 | 87381.3 | | 18 | 1048576 | 174762.6 | | 19
-              |2097152 | 349525.3 | | 20 |4194304 | 699050.6 | | 21 |8388608 | 1398101.3 | | 22 | 16777216 | 2796202.6 |
-              | 23 |33554432 | 5592405.3 | | 24 | 67108864 | 11184810.6 | | 25 | 134217728 | 22369621.3 | | 26 |
-              268435456 | 44739242.6 | | 27 | 536870912 | 89478485.3 | | 28 | 1073741824 | 178956970.6 | | 29 |
-              2147483648 | 357913941.3 | | 30 | 4294967296 | 715827882.6 | | 31 | 8589934592 | 1431655765.3 | | - | -| -
-              | | 32 | 34359738368 | 2863311530.6 | | … | … | … | | - | -| - |</p>
-            <p>리사이즈시 사용중인 양의 3배로 늘어남. 그리고 큰값중 가장 가까운 2의 지수중에 선택.</p>
-            <div class="language-plaintext highlighter-rouge">
-              <div class="highlight">
-                <pre class="highlight"><code>
+</code></pre></div></div>
+
+<p>1~7 ( min 3 )
+보면, log2_size가 2^7(128) 이하라면,  indices와 entries 할당량이 동일함. 즉, 변경전과 동일함. 지수값이 7일 때, 실제 사용 가능한 크기는 85.3</p>
+<ul>
+  <li>8~15
+2^15 (32768) 이하라면, indices가 entires의 2배임.</li>
+</ul>
+
+<p>16~31</p>
+
+<p>32~</p>
+
+<p>지수값별 사용가능한 크기
+| 지수 | indices 크기 | 사용가능 크기 / entries 크기 (2 ^ 지수 * 2 / 3) |
+| - | -|  - |
+| - | -(2^지수)- |  - |
+| 3  | 8  | 5.3 |
+| 4  | 16 | 10.6 |
+| 5  | 32  | 21.3 |
+| 6  | 64 |42.6 |
+| 7  | 128 |85.3 |
+| - | -(2^(지수+1))- |  - |
+| 8  | 512 | 170.6 |
+| 9  | 1024 | 341.3 |
+| 10  | 2048 | 682.6  |
+| 11  | 4096 | 1365.3  |
+| 12  |  8192 | 2730.6  |
+| 13  | 16384 | 5461.3  |
+| 14 | 32768 | 10922.6 |
+| 15|65536 | 21845.3 |
+| - | -(2^(지수+2))- |  - |
+| 16 | 262144 |  43690.6 |
+| 17 | 524288  | 87381.3  |
+| 18 | 1048576 | 174762.6  |
+| 19 |2097152 | 349525.3  |
+| 20 |4194304  | 699050.6  |
+| 21 |8388608  | 1398101.3  |
+| 22 | 16777216 | 2796202.6  |
+| 23 |33554432  |  5592405.3 |
+| 24 | 67108864 |  11184810.6 |
+| 25 | 134217728 | 22369621.3  |
+| 26 | 268435456 | 44739242.6  |
+| 27 | 536870912 | 89478485.3  |
+| 28 | 1073741824 | 178956970.6  |
+| 29 | 2147483648 | 357913941.3  |
+| 30 | 4294967296 | 715827882.6  |
+| 31 | 8589934592 |  1431655765.3 |
+| - | -|  - |
+| 32 | 34359738368 | 2863311530.6  |
+| … | … | …  |
+| - | -|  - |</p>
+
+<p>리사이즈시 사용중인 양의 3배로 늘어남. 그리고 큰값중 가장 가까운 2의 지수중에 선택.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
         dk = PyObject_Malloc(sizeof(PyDictKeysObject)
                              + ((size_t)1 &lt;&lt; log2_bytes)
                              + entry_size * usable);
-</code></pre>
-              </div>
-            </div>
-            <p>young normal old ( 프리는 2세대에서만 비움 )</p>
-            <p>usable = log2_size * 2 / 3</p>
-            <p>아이템을 삭제해도 usable 카운트는 줄지않음. 계속해서 늘려가면서 데이터를 할당.\</p>
-            <p>키값 유니코드만쓰다가 다른종류 쓰면, resize일어남. combine으로 변경!</p>
-          </section>
-          <footer class="page__meta">
-            <p class="page__taxonomy">
-              <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 태그: </strong>
-              <span itemprop="keywords">
-                <a href="/tags/#python-dictionary-cpython" class="page__taxonomy-item" rel="tag">Python, Dictionary,
-                  Cpython</a>
-              </span>
-            </p>
-            <p class="page__taxonomy">
-              <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 카테고리: </strong>
-              <span itemprop="keywords">
-                <a href="/categories/#python" class="page__taxonomy-item" rel="tag">Python</a>
-              </span>
-            </p>
-            <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 업데이트:</strong>
-              <time datetime="2022-03-09">March 9, 2022</time></p>
-          </footer>
-          <section class="page__share">
-            <h4 class="page__share-title">공유하기</h4>
-            <a href="https://twitter.com/intent/tweet?text=Python+Object+%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0%20http%3A%2F%2Flocalhost%3A4000%2Fpython%2FPython-Dict-%25EC%25AA%25BC%25EA%25B0%259C%25EB%25B3%25B4%25EA%25B8%25B0%2F"
-              class="btn btn--twitter"
-              onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
-              title="공유하기 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
-            <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fpython%2FPython-Dict-%25EC%25AA%25BC%25EA%25B0%259C%25EB%25B3%25B4%25EA%25B8%25B0%2F"
-              class="btn btn--facebook"
-              onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
-              title="공유하기 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
-            <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fpython%2FPython-Dict-%25EC%25AA%25BC%25EA%25B0%259C%25EB%25B3%25B4%25EA%25B8%25B0%2F"
-              class="btn btn--linkedin"
-              onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
-              title="공유하기 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
-          </section>
-          <nav class="pagination">
-            <a href="/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/" class="pagination--pager"
-              title="ext_storage not found 문제 해결
+</code></pre></div></div>
+
+<p>young normal old ( 프리는 2세대에서만 비움 )</p>
+
+<p>usable = log2_size * 2 / 3</p>
+
+<p>아이템을 삭제해도 usable 카운트는 줄지않음. 
+계속해서 늘려가면서 데이터를 할당.\</p>
+
+<p>키값 유니코드만쓰다가 다른종류 쓰면, resize일어남. combine으로 변경!</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 태그: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#python-dictionary-cpython" class="page__taxonomy-item" rel="tag">Python, Dictionary, Cpython</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 카테고리: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#python" class="page__taxonomy-item" rel="tag">Python</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 업데이트:</strong> <time datetime="2022-03-09">March 9, 2022</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">공유하기</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Python+Object+%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0%20http%3A%2F%2Flocalhost%3A4000%2Fpython%2FPython-Dict-%25EC%25AA%25BC%25EA%25B0%259C%25EB%25B3%25B4%25EA%25B8%25B0%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fpython%2FPython-Dict-%25EC%25AA%25BC%25EA%25B0%259C%25EB%25B3%25B4%25EA%25B8%25B0%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fpython%2FPython-Dict-%25EC%25AA%25BC%25EA%25B0%259C%25EB%25B3%25B4%25EA%25B8%25B0%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/" class="pagination--pager" title="ext_storage not found 문제 해결
 ">이전</a>
-            <a href="/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/"
-              class="pagination--pager" title="Flutter로 게임 만들기
+    
+    
+      <a href="/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/" class="pagination--pager" title="Flutter로 게임 만들기
 ">다음</a>
-          </nav>
-        </div>
-      </article>
-      <div class="page__related">
-        <h4 class="page__related-title">참고</h4>
-        <div class="grid__wrapper">
-          <div class="grid__item">
-            <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-              <h2 class="archive__item-title no_toc" itemprop="headline">
-                <a href="/python/Celery-UnlockChord-Bug-Debug/" rel="permalink">Celery UnlockChord Bug Debug </a>
-              </h2>
-              <p class="page__meta">
-                <span class="page__meta-readtime">
-                  <i class="far fa-clock" aria-hidden="true"></i> 4 분 소요 </span>
-              </p>
-              <p class="archive__item-excerpt" itemprop="description">Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우,
-                unlock_chord 에러가 무한루프로 발생하는 버그 디버그 </p>
-            </article>
-          </div>
-          <div class="grid__item">
-            <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-              <h2 class="archive__item-title no_toc" itemprop="headline">
-                <a href="/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/"
-                  rel="permalink">Python Gunicorn multiproessing 멈춤현상 </a>
-              </h2>
-              <p class="page__meta">
-                <span class="page__meta-readtime">
-                  <i class="far fa-clock" aria-hidden="true"></i> 1 분 소요 </span>
-              </p>
-              <p class="archive__item-excerpt" itemprop="description">gunicorn으로 multiprocessing.pool을 이용할 때, sub
-                processs에서 에러 발생시, 해당 요청이 프리징이 걸리는 현상에 대한 확인 </p>
-            </article>
-          </div>
-          <div class="grid__item">
-            <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-              <h2 class="archive__item-title no_toc" itemprop="headline">
-                <a href="/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/"
-                  rel="permalink">Flutter로 게임 만들기 </a>
-              </h2>
-              <p class="page__meta">
-                <span class="page__meta-readtime">
-                  <i class="far fa-clock" aria-hidden="true"></i> 최대 1 분 소요 </span>
-              </p>
-              <p class="archive__item-excerpt" itemprop="description">Flutter로 게임 만들기 </p>
-            </article>
-          </div>
-          <div class="grid__item">
-            <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-              <h2 class="archive__item-title no_toc" itemprop="headline">
-                <a href="/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/"
-                  rel="permalink">ext_storage not found 문제 해결 </a>
-              </h2>
-              <p class="page__meta">
-                <span class="page__meta-readtime">
-                  <i class="far fa-clock" aria-hidden="true"></i> 최대 1 분 소요 </span>
-              </p>
-              <p class="archive__item-excerpt" itemprop="description">module 'ext_storage' not found 해결 </p>
-            </article>
-          </div>
-        </div>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">참고</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/python/Celery-UnlockChord-Bug-Debug/" rel="permalink">Celery UnlockChord Bug Debug
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/" rel="permalink">Python Gunicorn multiproessing 멈춤현상
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">gunicorn으로 multiprocessing.pool을 이용할 때, sub processs에서 에러 발생시, 해당 요청이 프리징이 걸리는 현상에 대한 확인
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/" rel="permalink">Flutter로 게임 만들기
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          최대 1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Flutter로 게임 만들기
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/" rel="permalink">ext_storage not found 문제 해결
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          최대 1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">module 'ext_storage' not found 해결
+
+</p>
+  </article>
+</div>
+
+        
       </div>
     </div>
-  </div>
-  <div id="footer" class="page__footer">
-    <footer>
-      <!-- start custom footer snippets -->
-      <!-- end custom footer snippets -->
-      <div class="page__footer-follow">
-        <ul class="social-icons">
-          <li><strong>팔로우:</strong></li>
-          <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> 피드</a></li>
-        </ul>
-      </div>
-      <div class="page__footer-copyright">&copy; 2024 paca94. Powered by <a href="https://jekyllrb.com"
-          rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/"
-          rel="nofollow">Minimal Mistakes</a>.</div>
-    </footer>
-  </div>
-  <script src="/assets/js/main.min.js"></script>
-</body>
+  
+  
+</div>
 
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>팔로우:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> 피드</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 paca94. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
 </html>
