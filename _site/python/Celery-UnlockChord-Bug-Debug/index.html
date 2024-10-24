@@ -1,0 +1,852 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="ko" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Celery UnlockChord Bug Debug &amp;#124 paca94 Develop Blog</title>
+<meta name="description" content="Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그">
+
+
+  <meta name="author" content="paca94">
+  
+  <meta property="article:author" content="paca94">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="paca94 Develop Blog">
+<meta property="og:title" content="Celery UnlockChord Bug Debug">
+<meta property="og:url" content="http://localhost:4000/python/Celery-UnlockChord-Bug-Debug/">
+
+
+  <meta property="og:description" content="Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2022-08-13T00:00:00+09:00">
+
+
+
+  <meta property="article:modified_time" content="2022-08-13T16:22:00+09:00">
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/python/Celery-UnlockChord-Bug-Debug/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "paca94",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="paca94 Develop Blog Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          즐기는 개발자
+          <span class="site-subtitle">Version 1.0</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/tags/">Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/about/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/posts/">연도별 포스트</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">토글 메뉴</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+  
+    
+
+
+
+<nav class="breadcrumbs">
+  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+    
+    
+    
+      
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="http://localhost:4000/" itemprop="item"><span itemprop="name">Home</span></a>
+          <meta itemprop="position" content="1" />
+        </li>
+        <span class="sep">/</span>
+      
+      
+        
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="/categories/#python" itemprop="item"><span itemprop="name">Python</span></a>
+          <meta itemprop="position" content="2" />
+        </li>
+        <span class="sep">/</span>
+      
+    
+      
+      
+        <li class="current">Celery UnlockChord Bug Debug</li>
+      
+    
+  </ol>
+</nav>
+
+  
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">paca94</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>고민이 생기고 해당 고민에 대해 어떤 결과를 도출해내는지 써내려가는 블로그입니다.<br />여러가지 의견은 언제나 환영입니다!</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">팔로우</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Republic Of Korea. Daejeon</span>
+        </li>
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://github.com/paca94" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+          
+        
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:jihwan.dev@gmail.com">
+            <meta itemprop="email" content="jihwan.dev@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">이메일</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Celery UnlockChord Bug Debug">
+    <meta itemprop="description" content="Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그">
+    <meta itemprop="datePublished" content="2022-08-13T00:00:00+09:00">
+    <meta itemprop="dateModified" content="2022-08-13T16:22:00+09:00">
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Celery UnlockChord Bug Debug
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 분 소요
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> 목차</h4></header>
+              <ul class="toc__menu"><li><a href="#서문">서문</a></li><li><a href="#env">ENV</a></li><li><a href="#celery---chain-group-chord-란">celery - chain, group, chord 란?</a><ul><li><a href="#chain">chain</a></li><li><a href="#group">group</a></li><li><a href="#chord">chord</a></li></ul></li><li><a href="#왜-이런-문제가-발생했는가">왜 이런 문제가 발생했는가?</a><ul><li><a href="#in-python--normal-case-">in python ( normal case )</a></li><li><a href="#in-celery">in celery</a><ul><li><a href="#왜-2개만-남기고-나머지만-사라졌는가">왜 2개만 남기고 나머지만 사라졌는가?</a></li></ul></li></ul></li></ul>
+
+            </nav>
+          </aside>
+        
+        <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그</span>
+</code></pre></div></div>
+
+<h1 id="서문">서문</h1>
+<p>celery에서 db를 redis가 아닌 다른 것으로 지정하고 (mysql), chord를 호출할 경우, 2개가 초과되는 task들이 사라지는 현상이 발생했다.
+( 결과를 받는 부분에선 모두 가지고 있는데, 실제로 task가 실행되는 것은 2개다. )</p>
+
+<blockquote>
+  <p>해당 버그는 5.3.0에서 수정되었다.</p>
+</blockquote>
+
+<h1 id="env">ENV</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python 3.10
+celery 5.2.7
+</code></pre></div></div>
+
+<h1 id="celery---chain-group-chord-란">celery - chain, group, chord 란?</h1>
+<h2 id="chain">chain</h2>
+<p>함수 합성같은 거라고 보면 된다. ( method chaining 해서 사용 )</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">input</span>
+<span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="n">input_a</span><span class="p">,</span> <span class="n">input_b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">input_a</span><span class="p">,</span> <span class="n">input_b</span>
+<span class="nf">chain</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">b</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)).</span><span class="nf">apply_async</span><span class="p">()</span>
+<span class="c1"># result -&gt; (1, 2)
+</span>
+</code></pre></div></div>
+<p>위를 실행한다면, a method가 실행된 결과가 b method의 args의 앞으로 붙는다.
+즉,b(a(1), 2)처럼 실행이 된다.
+( 위에서 chain 부분은 (a.s(1) | b.s(2)).apply_async() 와 같다. <code class="language-plaintext highlighter-rouge">|</code> 는 chain을 의미한다. )</p>
+
+<h2 id="group">group</h2>
+<p>여러가지 작업을 병렬로 돌릴 수 있게 해주는 것이라고 보면 된다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">input</span>
+<span class="p">(</span><span class="nf">group</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="n">current_input</span><span class="p">))</span> <span class="k">for</span> <span class="n">current_input</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)).</span><span class="nf">apply_async</span><span class="p">()</span>
+</code></pre></div></div>
+<p>위를 실행한다면, a method가 celery의 task로 생성되어 각 celery에서 실행되게 된다. ( 정확히는 메세지가 메세지 큐로 던져진다. )
+만약, 3대의 celery worker가 실행중이라면, 어디서 실행될지 모르지만, 나눠서 a(0), a(1), a(2), a(3) … a(9) 까지 각각의 워커에서 실행되게 된다.</p>
+
+<h2 id="chord">chord</h2>
+<p>group과 chain을 합성시킨 것이라고 보면 된다. 만약, group + chain으로 쓴다면, 자동으로 chord로 승격시킨다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">input</span>
+<span class="k">def</span> <span class="nf">after_run</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+    <span class="n">reutrn</span> <span class="n">results</span><span class="p">,</span> <span class="nb">input</span>
+<span class="nf">chord</span><span class="p">(</span>
+    <span class="nf">group</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)),</span> <span class="n">after_run</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="sh">"</span><span class="s">hello?</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">).</span><span class="nf">apply_async</span><span class="p">()</span>
+</code></pre></div></div>
+<p>만약, 위의 코드를 실행하게 된다면, celery는 group에 대한 task를 실행시켜서, 메세지를 메세지 큐에 던진다. ( 10개의 메세지 전달 )
+이후, 만약 backend 를 db로 쓴다면, chord가 끝났을 때를 위한 unlock_chord 메세지를 큐에 던진다. ( 1개의 메세지 전달 ) ( redis 를 썼을 때랑 동작이 조금 다르다. 해당부분은 별도로 체크 안했다. )
+앞의 10개의 메세지가 모두 처리된다면, unlock_chord가 처리되면서 after_run이 실행된다.
+after_run은 <code class="language-plaintext highlighter-rouge">after_run([0,1,2,3,4,5,6,7,8,9], "hello?")</code> 로 실행된다.</p>
+
+<p>group + chain은 chord로 승격되며, 아래의 두개 코드는 위의 예제와 동일한 의미를 지닌다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span>
+    <span class="nf">group</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> <span class="o">|</span> <span class="n">after_run</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="sh">"</span><span class="s">hello?</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">).</span><span class="nf">apply_async</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h1 id="왜-이런-문제가-발생했는가">왜 이런 문제가 발생했는가?</h1>
+<h2 id="in-python--normal-case-">in python ( normal case )</h2>
+<p>결과를 먼저 이야기하자면, zip method가 lazy_evaluation 때문이라서 발생한 일이다.
+만약, 아래의 python 코드를 실행했을 때 결과가 어떨것같은가 ?</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="n">t</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">t1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">zt</span> <span class="o">=</span> <span class="nf">zip</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">t1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">t1</span><span class="p">.</span><span class="nf">pop</span><span class="p">()</span>
+<span class="mi">6</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">list</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>위 코드의 결과값은 <code class="language-plaintext highlighter-rouge">[(1,4), (2,5)]</code> 로 나온다. 즉, zip하는 두개의 리스트에 대한 길이가 맞지 않아도 아무런 에러를 일으키지 않고, lazy evaluation 이기 때문에, 평가되기 전에 해당 변수로 다른 처리를 한다면, 영향을 끼친다.</p>
+
+<h2 id="in-celery">in celery</h2>
+<p>아래는 canvas.py -&gt; _chord.run 메서드이다.
+아래의 코드는 chord 가 실행되면, 몇가지 method를 거쳐 실행되게 된다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">partial_args</span><span class="p">,</span> <span class="n">app</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">countdown</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">eager</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">app</span> <span class="ow">or</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_app</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+    <span class="n">group_id</span> <span class="o">=</span> <span class="n">header</span><span class="p">.</span><span class="n">options</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">)</span> <span class="ow">or</span> <span class="nf">uuid</span><span class="p">()</span>
+    <span class="n">root_id</span> <span class="o">=</span> <span class="n">body</span><span class="p">.</span><span class="n">options</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">root_id</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">options</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="k">if</span> <span class="n">options</span> <span class="k">else</span> <span class="n">self</span><span class="p">.</span><span class="n">options</span>
+    <span class="k">if</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">options</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">body</span><span class="p">.</span><span class="n">options</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="n">bodyres</span> <span class="o">=</span> <span class="n">body</span><span class="p">.</span><span class="nf">freeze</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">root_id</span><span class="o">=</span><span class="n">root_id</span><span class="p">)</span>
+
+    <span class="c1"># Chains should not be passed to the header tasks. See #3771
+</span>    <span class="n">options</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="sh">'</span><span class="s">chain</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="c1"># Neither should chords, for deeply nested chords to work
+</span>    <span class="n">options</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="sh">'</span><span class="s">chord</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">options</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="n">header_result_args</span> <span class="o">=</span> <span class="n">header</span><span class="p">.</span><span class="nf">_freeze_group_tasks</span><span class="p">(</span><span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span> <span class="n">chord</span><span class="o">=</span><span class="n">body</span><span class="p">,</span> <span class="n">root_id</span><span class="o">=</span><span class="n">root_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">header</span><span class="p">.</span><span class="n">tasks</span><span class="p">:</span>
+        <span class="n">app</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="nf">apply_chord</span><span class="p">(</span>
+            <span class="n">header_result_args</span><span class="p">,</span>
+            <span class="n">body</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+            <span class="n">countdown</span><span class="o">=</span><span class="n">countdown</span><span class="p">,</span>
+            <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">header_result</span> <span class="o">=</span> <span class="nf">header</span><span class="p">(</span><span class="o">*</span><span class="n">partial_args</span><span class="p">,</span> <span class="n">task_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="c1"># The execution of a chord body is normally triggered by its header's
+</span>    <span class="c1"># tasks completing. If the header is empty this will never happen, so
+</span>    <span class="c1"># we execute the body manually here.
+</span>    <span class="k">else</span><span class="p">:</span>
+        <span class="n">body</span><span class="p">.</span><span class="nf">delay</span><span class="p">([])</span>
+        <span class="n">header_result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">app</span><span class="p">.</span><span class="nc">GroupResult</span><span class="p">(</span><span class="o">*</span><span class="n">header_result_args</span><span class="p">)</span>
+
+    <span class="n">bodyres</span><span class="p">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">header_result</span>
+    <span class="k">return</span> <span class="n">bodyres</span>
+</code></pre></div></div>
+<p>위 메서드에서 해당 task들이 2개만 남고 나머지는 사라지는 현상이 어디서 생기는지에 대해 디버깅해봤는데, 해당 지점이 <code class="language-plaintext highlighter-rouge">app.backend.apply_chord</code> method를 호출하는 시점이었다.</p>
+
+<p>아래는 해당 부분에서 호출되는 celery/backends/base.py 에서 Backend class의 apply_chord 메서드이다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">apply_chord</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">header_result_args</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">ensure_chords_allowed</span><span class="p">()</span>
+    <span class="n">header_result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">app</span><span class="p">.</span><span class="nc">GroupResult</span><span class="p">(</span><span class="o">*</span><span class="n">header_result_args</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">fallback_chord_unlock</span><span class="p">(</span><span class="n">header_result</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div></div>
+<p>위 method를 보면, 이상할 부분은 없지만, 실제로 문제가 되었던 부분은 <code class="language-plaintext highlighter-rouge">header_result = self.app.GroupResult(*header_result_args)</code> 호출이었다.
+해당 부분에서 내부적으로 lazy evaluation으로 묶어놓은 것이 <code class="language-plaintext highlighter-rouge">GroupResult</code>에서 평가되며 task들이 모두 사라져버렸다.
+왜 이런일이 발생했는가는 다른 코드에서 확인 할 수 있었다.</p>
+
+<p>아래는 run method에서 header._freeze_group_tasks가 호출되었을 때 실행되는 method이다.
+canvas.py -&gt; group._freeze_group_tasks</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_freeze_group_tasks</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chord</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">root_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">group_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="c1"># pylint: disable=redefined-outer-name
+</span>    <span class="c1">#  XXX chord is also a class in outer scope.
+</span>    <span class="n">opts</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">options</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">gid</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">]</span>
+    <span class="k">except</span> <span class="nb">KeyError</span><span class="p">:</span>
+        <span class="n">gid</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_id</span> <span class="ow">or</span> <span class="nf">uuid</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">group_id</span><span class="p">:</span>
+        <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">group_id</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_id</span>
+    <span class="k">if</span> <span class="n">chord</span><span class="p">:</span>
+        <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">chord</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">chord</span>
+    <span class="k">if</span> <span class="n">group_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">group_index</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_index</span>
+    <span class="n">root_id</span> <span class="o">=</span> <span class="n">opts</span><span class="p">.</span><span class="nf">setdefault</span><span class="p">(</span><span class="sh">'</span><span class="s">root_id</span><span class="sh">'</span><span class="p">,</span> <span class="n">root_id</span><span class="p">)</span>
+    <span class="n">parent_id</span> <span class="o">=</span> <span class="n">opts</span><span class="p">.</span><span class="nf">setdefault</span><span class="p">(</span><span class="sh">'</span><span class="s">parent_id</span><span class="sh">'</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">tasks</span><span class="p">,</span> <span class="n">_regen</span><span class="p">):</span>
+        <span class="c1"># We are draining from a generator here.
+</span>        <span class="c1"># tasks1, tasks2 are each a clone of self.tasks
+</span>        <span class="n">tasks1</span><span class="p">,</span> <span class="n">tasks2</span> <span class="o">=</span> <span class="n">itertools</span><span class="p">.</span><span class="nf">tee</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">_unroll_tasks</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">tasks</span><span class="p">))</span>
+        <span class="c1"># freeze each task in tasks1, results now holds AsyncResult for each task
+</span>        <span class="n">results</span> <span class="o">=</span> <span class="nf">regen</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">_freeze_tasks</span><span class="p">(</span><span class="n">tasks1</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">chord</span><span class="p">,</span> <span class="n">root_id</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">))</span>
+        <span class="c1"># TODO figure out why this makes sense -
+</span>        <span class="c1"># we freeze all tasks in the clone tㅌasks1, and then zip the results
+</span>        <span class="c1"># with the IDs of tasks in the second clone, tasks2. and then, we build
+</span>        <span class="c1"># a generator that takes only the task IDs from tasks2.
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="nf">regen</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">tasks2</span><span class="p">,</span> <span class="n">results</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_tasks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Need to unroll subgroups early so that chord gets the
+</span>        <span class="c1"># right result instance for chord_unlock etc.
+</span>        <span class="n">results</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">_freeze_unroll</span><span class="p">(</span>
+            <span class="n">new_tasks</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">chord</span><span class="p">,</span> <span class="n">root_id</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">,</span>
+        <span class="p">))</span>
+        <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">tasks</span><span class="p">,</span> <span class="n">MutableSequence</span><span class="p">):</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">tasks</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">new_tasks</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="n">new_tasks</span>
+    <span class="k">return</span> <span class="n">gid</span><span class="p">,</span> <span class="n">results</span>
+</code></pre></div></div>
+<p>실제로 동작시켜보면, <code class="language-plaintext highlighter-rouge">if isinstance(self.tasks, _regen):</code> 부분에서 true가 되어, 해당 부분에 있는 코드가 실행된다.
+results는 결과정보를 추적하기 위해 만들어놓은것으로 추정되었고, <code class="language-plaintext highlighter-rouge">self.tasks</code>에는 실행해야할 task 정보가 담겨있다.
+여기서 문제가 되는 부분은 <code class="language-plaintext highlighter-rouge">self.tasks = regen(x[0] for x in zip(tasks2, results))</code> 였다.
+<code class="language-plaintext highlighter-rouge">Backend.apply_chord</code> method에서 <code class="language-plaintext highlighter-rouge">GroupResult</code> 인스턴스가 만들어 질 때, results가 평가되며, <code class="language-plaintext highlighter-rouge">zip(tasks2, results)</code> 에 영향을 준 것이다.
+따라서, 해당 시점에 만약, <code class="language-plaintext highlighter-rouge">zip([0,1,2,3], [0,1,2,3])</code> 이라면, 실제로 task들이 message 큐를 전송할 때 즈음엔, <code class="language-plaintext highlighter-rouge">zip([0,1,2,3],[0,1])</code> 이 되면서 앞의 2개를 빼고 나머지 task들이 모두 사라지는 것이었다.</p>
+
+<h3 id="왜-2개만-남기고-나머지만-사라졌는가">왜 2개만 남기고 나머지만 사라졌는가?</h3>
+<p><code class="language-plaintext highlighter-rouge">run</code> method에서 <code class="language-plaintext highlighter-rouge">if header.tasks</code> 가 실행될 때, 앞의 2개에 대해선 이미 실행이 되었기 때문으로 추측된다.
+실제로, stack을 일일히 찍어보면, 해당 지점에서 2개가 미리 평가된다.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 태그: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#python-celery" class="page__taxonomy-item" rel="tag">Python, Celery</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 카테고리: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#python" class="page__taxonomy-item" rel="tag">Python</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 업데이트:</strong> <time datetime="2022-08-13">August 13, 2022</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">공유하기</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Celery+UnlockChord+Bug+Debug%20http%3A%2F%2Flocalhost%3A4000%2Fpython%2FCelery-UnlockChord-Bug-Debug%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fpython%2FCelery-UnlockChord-Bug-Debug%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fpython%2FCelery-UnlockChord-Bug-Debug%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="공유하기 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/" class="pagination--pager" title="Python Gunicorn multiproessing 멈춤현상
+">이전</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">다음</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">참고</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/" rel="permalink">Python Gunicorn multiproessing 멈춤현상
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">gunicorn으로 multiprocessing.pool을 이용할 때, sub processs에서 에러 발생시, 해당 요청이 프리징이 걸리는 현상에 대한 확인
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/" rel="permalink">Flutter로 게임 만들기
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          최대 1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Flutter로 게임 만들기
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/" rel="permalink">Python Object 쪼개보기
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          9 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Python Object 쪼개보기
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/" rel="permalink">ext_storage not found 문제 해결
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          최대 1 분 소요
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">module 'ext_storage' not found 해결
+
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>팔로우:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> 피드</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 paca94. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

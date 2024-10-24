@@ -52,4 +52,34 @@ var store = [{
         "tags": ["mysql"],
         "url": "/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0/",
         "teaser": null
+      },{
+        "title": "ext_storage not found 문제 해결",
+        "excerpt":"module 'ext_storage' not found 해결 문제 발생 CS용 어플리케이션 개발 이후, 내부 배포를 위해 TestFlight에 올리려고 헀는데, Archive를 돌릴 때마다, module ‘ext_storage’ not found에러가 발생했음. (해당 에러는 개발모드를 빌드할 때는 발생하지 않았음.) 해당 에러를 검색하고 적용해보니 정상적으로 동작했다. 해결방법 xcode에서 TARGETS-&gt;Runner-&gt;Deployment Info 를 보면, IOS 9.0 으로 되어있는데, 11.0으로 변경하면...","categories": ["Flutter"],
+        "tags": ["Flutter"],
+        "url": "/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/",
+        "teaser": null
+      },{
+        "title": "Python Object 쪼개보기",
+        "excerpt":"Python Object 쪼개보기 찾아본 이유 이번에 이직한 회사에서 Python을 쓰고 있는데, Dictionary 자료형의 기본크기는 몇이며, 얘는 어떻게 동작하고 그리고 크기 증가 전략은 어떤것인지 궁금해서 알아보게 되었다. Python Dictionary는 무엇인가? CPython Repo =&gt; Objects/dictobject.c line 1 Dictionary object implementation using a hash table memory Layout +---------------------+ | dk_refcnt | | dk_log2_size...","categories": ["Python"],
+        "tags": ["Python, Dictionary, Cpython"],
+        "url": "/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/",
+        "teaser": null
+      },{
+        "title": "Flutter로 게임 만들기",
+        "excerpt":"Flutter로 게임 만들기 게임을 만들게 된 이유 이전부터 게임하나를 만들어볼까 생각하고 있었는데, 마침 회사 창립 기념일 공모전이 열렸고, 해당 게임을 개발하여 응모하였다. 기술 스택 Client Flutter GetX ( Flutter State manager ) Flame ( Flutter Game Engine ) Server AWS Lambda AWS EventBridge MySQL Firebase Auth 걸린 시간 총 3일...","categories": ["Flutter"],
+        "tags": ["Flutter, Flame"],
+        "url": "/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/",
+        "teaser": null
+      },{
+        "title": "Python Gunicorn multiproessing 멈춤현상",
+        "excerpt":"gunicorn으로 multiprocessing.pool을 이용할 때, sub processs에서 에러 발생시, 해당 요청이 프리징이 걸리는 현상에 대한 확인 발생환경 Python 3.6.15 django 2.2 gunicorn 20.x 현상 gunicorn worker에서 만든 sub process에서 http 요청이 섞여있는 함수를 실행하다가 익셉션 발생시, 만들어진 sub process가 멈춤. 정확히는 Pool에 들어간 작업이 모두 끝나서 pool.terminate() 동작에 들어갔으나, sub process(os.waitpid로...","categories": ["Python"],
+        "tags": ["Python, Djnago, Gunicorn"],
+        "url": "/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/",
+        "teaser": null
+      },{
+        "title": "Celery UnlockChord Bug Debug",
+        "excerpt":"Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그 서문 celery에서 db를 redis가 아닌 다른 것으로 지정하고 (mysql), chord를 호출할 경우, 2개가 초과되는 task들이 사라지는 현상이 발생했다. ( 결과를 받는 부분에선 모두 가지고 있는데, 실제로 task가 실행되는 것은 2개다. ) 해당 버그는 5.3.0에서 수정되었다. ENV...","categories": ["Python"],
+        "tags": ["Python, Celery"],
+        "url": "/python/Celery-UnlockChord-Bug-Debug/",
+        "teaser": null
       }]

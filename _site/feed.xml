@@ -1,120 +1,857 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://jihwankim.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://jihwankim.github.io/" rel="alternate" type="text/html" /><updated>2021-07-07T06:33:35+09:00</updated><id>https://jihwankim.github.io/feed.xml</id><title type="html">JihwanKim Develop Blog</title><subtitle>백엔드 개발자이며, 취미로 플러터, 유니티를 만지는 개발자</subtitle><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><entry><title type="html">DB Charset 비일치로 인한 풀스캔 개선</title><link href="https://jihwankim.github.io/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0/" rel="alternate" type="text/html" title="DB Charset 비일치로 인한 풀스캔 개선" /><published>2021-07-07T00:00:00+09:00</published><updated>2021-07-07T23:30:00+09:00</updated><id>https://jihwankim.github.io/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0</id><content type="html" xml:base="https://jihwankim.github.io/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;문자열 불일치로 인한 풀스캔 수정기&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-10-25T04:40:37+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">paca94 Develop Blog</title><subtitle>기본을 중요시하는 백엔드 개발자</subtitle><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><entry><title type="html">Celery UnlockChord Bug Debug</title><link href="http://localhost:4000/python/Celery-UnlockChord-Bug-Debug/" rel="alternate" type="text/html" title="Celery UnlockChord Bug Debug" /><published>2022-08-13T00:00:00+09:00</published><updated>2022-08-13T16:22:00+09:00</updated><id>http://localhost:4000/python/Celery-UnlockChord-Bug-Debug</id><content type="html" xml:base="http://localhost:4000/python/Celery-UnlockChord-Bug-Debug/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그</span>
+</code></pre></div></div>
 
-&lt;h1 id=&quot;문제-발견&quot;&gt;문제 발견&lt;/h1&gt;
+<h1 id="서문">서문</h1>
+<p>celery에서 db를 redis가 아닌 다른 것으로 지정하고 (mysql), chord를 호출할 경우, 2개가 초과되는 task들이 사라지는 현상이 발생했다.
+( 결과를 받는 부분에선 모두 가지고 있는데, 실제로 task가 실행되는 것은 2개다. )</p>
 
-&lt;ol&gt;
-  &lt;li&gt;AWS slowQuery 로그 상에 특정 쿼리가 오래 걸리는 것을 발견함.&lt;/li&gt;
-&lt;/ol&gt;
+<blockquote>
+  <p>해당 버그는 5.3.0에서 수정되었다.</p>
+</blockquote>
 
-&lt;h1 id=&quot;원인-분석&quot;&gt;원인 분석&lt;/h1&gt;
+<h1 id="env">ENV</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python 3.10
+celery 5.2.7
+</code></pre></div></div>
 
-&lt;ol&gt;
-  &lt;li&gt;해당 쿼리문과 테이블을 살펴보면, 풀스캔을 하지 않도록 정상적으로 인덱스가 걸려있고, 해당 인덱스를 조건으로 사용하고 있음.&lt;/li&gt;
-  &lt;li&gt;Expain 해본 결과, 아래와 같이 조건 비교시, 다른 charset으로 convert하고 있음.
- &lt;img src=&quot;/assets/image/slow_query/convert.png&quot; alt=&quot;image&quot; /&gt;&lt;/li&gt;
-  &lt;li&gt;따라서, 아래 쿼리문을 통해 charset값이 utf8mb4가 아닌것들을 조회함.
-    &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE_NAME&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;COLUMN_NAME&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;COLUMN_TYPE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;character_set_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;COLLATION_NAME&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;information_schema&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;`COLUMNS`&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;C&lt;/span&gt;
- &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;table_schema&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;db&quot;&lt;/span&gt;
- &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;character_set_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'utf8mb4'&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
-    &lt;p&gt;&lt;img src=&quot;/assets/image/slow_query/charset.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
+<h1 id="celery---chain-group-chord-란">celery - chain, group, chord 란?</h1>
+<h2 id="chain">chain</h2>
+<p>함수 합성같은 거라고 보면 된다. ( method chaining 해서 사용 )</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">input</span>
+<span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="n">input_a</span><span class="p">,</span> <span class="n">input_b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">input_a</span><span class="p">,</span> <span class="n">input_b</span>
+<span class="nf">chain</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">b</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)).</span><span class="nf">apply_async</span><span class="p">()</span>
+<span class="c1"># result -&gt; (1, 2)
+</span>
+</code></pre></div></div>
+<p>위를 실행한다면, a method가 실행된 결과가 b method의 args의 앞으로 붙는다.
+즉,b(a(1), 2)처럼 실행이 된다.
+( 위에서 chain 부분은 (a.s(1) | b.s(2)).apply_async() 와 같다. <code class="language-plaintext highlighter-rouge">|</code> 는 chain을 의미한다. )</p>
 
-&lt;h1 id=&quot;해결&quot;&gt;해결&lt;/h1&gt;
+<h2 id="group">group</h2>
+<p>여러가지 작업을 병렬로 돌릴 수 있게 해주는 것이라고 보면 된다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">input</span>
+<span class="p">(</span><span class="nf">group</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="n">current_input</span><span class="p">))</span> <span class="k">for</span> <span class="n">current_input</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)).</span><span class="nf">apply_async</span><span class="p">()</span>
+</code></pre></div></div>
+<p>위를 실행한다면, a method가 celery의 task로 생성되어 각 celery에서 실행되게 된다. ( 정확히는 메세지가 메세지 큐로 던져진다. )
+만약, 3대의 celery worker가 실행중이라면, 어디서 실행될지 모르지만, 나눠서 a(0), a(1), a(2), a(3) … a(9) 까지 각각의 워커에서 실행되게 된다.</p>
 
-&lt;ol&gt;
-  &lt;li&gt;charset이 &lt;strong&gt;utf8/ascii/laten1&lt;/strong&gt; 인 것들을 &lt;strong&gt;utf8mb4&lt;/strong&gt;로 변환함&lt;/li&gt;
-  &lt;li&gt;풀스캔을 하지 않게 되서 쿼리 동작 속도가 빨라짐&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="Develop" /><category term="mysql" /><summary type="html">문자열 불일치로 인한 풀스캔 수정기</summary></entry><entry><title type="html">LawDocOffice Server 개발기(토이, ts)</title><link href="https://jihwankim.github.io/develop/LawDocOffice-%EC%84%9C%EB%B2%84-%EA%B0%9C%EB%B0%9C%EA%B8%B0/" rel="alternate" type="text/html" title="LawDocOffice Server 개발기(토이, ts)" /><published>2021-07-01T00:00:00+09:00</published><updated>2021-06-17T23:06:00+09:00</updated><id>https://jihwankim.github.io/develop/LawDocOffice-%EC%84%9C%EB%B2%84-%EA%B0%9C%EB%B0%9C%EA%B8%B0</id><content type="html" xml:base="https://jihwankim.github.io/develop/LawDocOffice-%EC%84%9C%EB%B2%84-%EA%B0%9C%EB%B0%9C%EA%B8%B0/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;LawDocOffice Server 개발기(토이, ts)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+<h2 id="chord">chord</h2>
+<p>group과 chain을 합성시킨 것이라고 보면 된다. 만약, group + chain으로 쓴다면, 자동으로 chord로 승격시킨다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">input</span>
+<span class="k">def</span> <span class="nf">after_run</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+    <span class="n">reutrn</span> <span class="n">results</span><span class="p">,</span> <span class="nb">input</span>
+<span class="nf">chord</span><span class="p">(</span>
+    <span class="nf">group</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)),</span> <span class="n">after_run</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="sh">"</span><span class="s">hello?</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">).</span><span class="nf">apply_async</span><span class="p">()</span>
+</code></pre></div></div>
+<p>만약, 위의 코드를 실행하게 된다면, celery는 group에 대한 task를 실행시켜서, 메세지를 메세지 큐에 던진다. ( 10개의 메세지 전달 )
+이후, 만약 backend 를 db로 쓴다면, chord가 끝났을 때를 위한 unlock_chord 메세지를 큐에 던진다. ( 1개의 메세지 전달 ) ( redis 를 썼을 때랑 동작이 조금 다르다. 해당부분은 별도로 체크 안했다. )
+앞의 10개의 메세지가 모두 처리된다면, unlock_chord가 처리되면서 after_run이 실행된다.
+after_run은 <code class="language-plaintext highlighter-rouge">after_run([0,1,2,3,4,5,6,7,8,9], "hello?")</code> 로 실행된다.</p>
 
-&lt;p&gt;&lt;a href=&quot;https://github.com/JihwanKim/law_office_server&quot;&gt;Github Link&lt;/a&gt;&lt;/p&gt;
+<p>group + chain은 chord로 승격되며, 아래의 두개 코드는 위의 예제와 동일한 의미를 지닌다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span>
+    <span class="nf">group</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> <span class="o">|</span> <span class="n">after_run</span><span class="p">.</span><span class="nf">s</span><span class="p">(</span><span class="sh">"</span><span class="s">hello?</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">).</span><span class="nf">apply_async</span><span class="p">()</span>
+</code></pre></div></div>
 
-&lt;p&gt;개발기간&lt;br /&gt;
-&lt;strong&gt;LawDocOffice 2020.10.27 ~ 2020.11.16&lt;/strong&gt;&lt;br /&gt;
-&lt;strong&gt;LawSubAgent 2020.12.16 ~ 2020.12.30&lt;/strong&gt;&lt;/p&gt;
+<h1 id="왜-이런-문제가-발생했는가">왜 이런 문제가 발생했는가?</h1>
+<h2 id="in-python--normal-case-">in python ( normal case )</h2>
+<p>결과를 먼저 이야기하자면, zip method가 lazy_evaluation 때문이라서 발생한 일이다.
+만약, 아래의 python 코드를 실행했을 때 결과가 어떨것같은가 ?</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="n">t</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">t1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">zt</span> <span class="o">=</span> <span class="nf">zip</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">t1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">t1</span><span class="p">.</span><span class="nf">pop</span><span class="p">()</span>
+<span class="mi">6</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">list</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+</code></pre></div></div>
 
-&lt;p&gt;과거 아는분과 기회가 되서, 간단한 토이를 진행했었는데, 작업을 했었던 것에 대한 기록이다.&lt;/p&gt;
+<p>위 코드의 결과값은 <code class="language-plaintext highlighter-rouge">[(1,4), (2,5)]</code> 로 나온다. 즉, zip하는 두개의 리스트에 대한 길이가 맞지 않아도 아무런 에러를 일으키지 않고, lazy evaluation 이기 때문에, 평가되기 전에 해당 변수로 다른 처리를 한다면, 영향을 끼친다.</p>
 
-&lt;h1 id=&quot;사용햤던-기술&quot;&gt;사용햤던 기술&lt;/h1&gt;
+<h2 id="in-celery">in celery</h2>
+<p>아래는 canvas.py -&gt; _chord.run 메서드이다.
+아래의 코드는 chord 가 실행되면, 몇가지 method를 거쳐 실행되게 된다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">partial_args</span><span class="p">,</span> <span class="n">app</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">countdown</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">eager</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">app</span> <span class="ow">or</span> <span class="n">self</span><span class="p">.</span><span class="nf">_get_app</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+    <span class="n">group_id</span> <span class="o">=</span> <span class="n">header</span><span class="p">.</span><span class="n">options</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">)</span> <span class="ow">or</span> <span class="nf">uuid</span><span class="p">()</span>
+    <span class="n">root_id</span> <span class="o">=</span> <span class="n">body</span><span class="p">.</span><span class="n">options</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">root_id</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">options</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="k">if</span> <span class="n">options</span> <span class="k">else</span> <span class="n">self</span><span class="p">.</span><span class="n">options</span>
+    <span class="k">if</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">options</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">body</span><span class="p">.</span><span class="n">options</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
 
-&lt;p&gt;언어 : &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TypeScript&lt;/code&gt;&lt;/p&gt;
+    <span class="n">bodyres</span> <span class="o">=</span> <span class="n">body</span><span class="p">.</span><span class="nf">freeze</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">root_id</span><span class="o">=</span><span class="n">root_id</span><span class="p">)</span>
 
-&lt;ul&gt;
-  &lt;li&gt;기존에 NodeJS를 간단하게 쓰고 있었는데, 타입이 추가되고 여러가지 부분에서 편해진 TypeScript가 요즘 괜찮다는 지인의 추천이 떠올라 해당 언어를 사용하도록 선택하였다.&lt;/li&gt;
-&lt;/ul&gt;
+    <span class="c1"># Chains should not be passed to the header tasks. See #3771
+</span>    <span class="n">options</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="sh">'</span><span class="s">chain</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="c1"># Neither should chords, for deeply nested chords to work
+</span>    <span class="n">options</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="sh">'</span><span class="s">chord</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">options</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
 
-&lt;p&gt;프레임워크 : &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Express&lt;/code&gt;&lt;/p&gt;
+    <span class="n">header_result_args</span> <span class="o">=</span> <span class="n">header</span><span class="p">.</span><span class="nf">_freeze_group_tasks</span><span class="p">(</span><span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span> <span class="n">chord</span><span class="o">=</span><span class="n">body</span><span class="p">,</span> <span class="n">root_id</span><span class="o">=</span><span class="n">root_id</span><span class="p">)</span>
 
-&lt;ul&gt;
-  &lt;li&gt;기존에 AWS SAM을 적용하면서 예제에서 Express를 가지고 예제를 올려놨어서, 생소하지만, 다른 것들에 비해 그나마 제일 익숙해서 선택하였다.&lt;/li&gt;
-&lt;/ul&gt;
+    <span class="k">if</span> <span class="n">header</span><span class="p">.</span><span class="n">tasks</span><span class="p">:</span>
+        <span class="n">app</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="nf">apply_chord</span><span class="p">(</span>
+            <span class="n">header_result_args</span><span class="p">,</span>
+            <span class="n">body</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+            <span class="n">countdown</span><span class="o">=</span><span class="n">countdown</span><span class="p">,</span>
+            <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">header_result</span> <span class="o">=</span> <span class="nf">header</span><span class="p">(</span><span class="o">*</span><span class="n">partial_args</span><span class="p">,</span> <span class="n">task_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="c1"># The execution of a chord body is normally triggered by its header's
+</span>    <span class="c1"># tasks completing. If the header is empty this will never happen, so
+</span>    <span class="c1"># we execute the body manually here.
+</span>    <span class="k">else</span><span class="p">:</span>
+        <span class="n">body</span><span class="p">.</span><span class="nf">delay</span><span class="p">([])</span>
+        <span class="n">header_result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">app</span><span class="p">.</span><span class="nc">GroupResult</span><span class="p">(</span><span class="o">*</span><span class="n">header_result_args</span><span class="p">)</span>
 
-&lt;p&gt;Node 프로세스 관리자 : &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PM2&lt;/code&gt;&lt;/p&gt;
+    <span class="n">bodyres</span><span class="p">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">header_result</span>
+    <span class="k">return</span> <span class="n">bodyres</span>
+</code></pre></div></div>
+<p>위 메서드에서 해당 task들이 2개만 남고 나머지는 사라지는 현상이 어디서 생기는지에 대해 디버깅해봤는데, 해당 지점이 <code class="language-plaintext highlighter-rouge">app.backend.apply_chord</code> method를 호출하는 시점이었다.</p>
 
-&lt;ul&gt;
-  &lt;li&gt;로컬에서 개발할때 매일 npm run ~~~ 을 치는것이 귀찮아서 백그라운드에 올려놓는 방법을 찾다가 채택하였다. 추가로 nodemon을 이용하여, 코드가 바뀌면 자동으로 재실행하게 구성하였다.&lt;/li&gt;
-&lt;/ul&gt;
+<p>아래는 해당 부분에서 호출되는 celery/backends/base.py 에서 Backend class의 apply_chord 메서드이다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">apply_chord</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">header_result_args</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">ensure_chords_allowed</span><span class="p">()</span>
+    <span class="n">header_result</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">app</span><span class="p">.</span><span class="nc">GroupResult</span><span class="p">(</span><span class="o">*</span><span class="n">header_result_args</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">fallback_chord_unlock</span><span class="p">(</span><span class="n">header_result</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div></div>
+<p>위 method를 보면, 이상할 부분은 없지만, 실제로 문제가 되었던 부분은 <code class="language-plaintext highlighter-rouge">header_result = self.app.GroupResult(*header_result_args)</code> 호출이었다.
+해당 부분에서 내부적으로 lazy evaluation으로 묶어놓은 것이 <code class="language-plaintext highlighter-rouge">GroupResult</code>에서 평가되며 task들이 모두 사라져버렸다.
+왜 이런일이 발생했는가는 다른 코드에서 확인 할 수 있었다.</p>
 
-&lt;p&gt;DB : &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MariaDB&lt;/code&gt;&lt;/p&gt;
+<p>아래는 run method에서 header._freeze_group_tasks가 호출되었을 때 실행되는 method이다.
+canvas.py -&gt; group._freeze_group_tasks</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_freeze_group_tasks</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chord</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">root_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">group_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="c1"># pylint: disable=redefined-outer-name
+</span>    <span class="c1">#  XXX chord is also a class in outer scope.
+</span>    <span class="n">opts</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">options</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">gid</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">]</span>
+    <span class="k">except</span> <span class="nb">KeyError</span><span class="p">:</span>
+        <span class="n">gid</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">task_id</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_id</span> <span class="ow">or</span> <span class="nf">uuid</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">group_id</span><span class="p">:</span>
+        <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">group_id</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_id</span>
+    <span class="k">if</span> <span class="n">chord</span><span class="p">:</span>
+        <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">chord</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">chord</span>
+    <span class="k">if</span> <span class="n">group_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">opts</span><span class="p">[</span><span class="sh">'</span><span class="s">group_index</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_index</span>
+    <span class="n">root_id</span> <span class="o">=</span> <span class="n">opts</span><span class="p">.</span><span class="nf">setdefault</span><span class="p">(</span><span class="sh">'</span><span class="s">root_id</span><span class="sh">'</span><span class="p">,</span> <span class="n">root_id</span><span class="p">)</span>
+    <span class="n">parent_id</span> <span class="o">=</span> <span class="n">opts</span><span class="p">.</span><span class="nf">setdefault</span><span class="p">(</span><span class="sh">'</span><span class="s">parent_id</span><span class="sh">'</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">tasks</span><span class="p">,</span> <span class="n">_regen</span><span class="p">):</span>
+        <span class="c1"># We are draining from a generator here.
+</span>        <span class="c1"># tasks1, tasks2 are each a clone of self.tasks
+</span>        <span class="n">tasks1</span><span class="p">,</span> <span class="n">tasks2</span> <span class="o">=</span> <span class="n">itertools</span><span class="p">.</span><span class="nf">tee</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">_unroll_tasks</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">tasks</span><span class="p">))</span>
+        <span class="c1"># freeze each task in tasks1, results now holds AsyncResult for each task
+</span>        <span class="n">results</span> <span class="o">=</span> <span class="nf">regen</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">_freeze_tasks</span><span class="p">(</span><span class="n">tasks1</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">chord</span><span class="p">,</span> <span class="n">root_id</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">))</span>
+        <span class="c1"># TODO figure out why this makes sense -
+</span>        <span class="c1"># we freeze all tasks in the clone tㅌasks1, and then zip the results
+</span>        <span class="c1"># with the IDs of tasks in the second clone, tasks2. and then, we build
+</span>        <span class="c1"># a generator that takes only the task IDs from tasks2.
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="nf">regen</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">tasks2</span><span class="p">,</span> <span class="n">results</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_tasks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Need to unroll subgroups early so that chord gets the
+</span>        <span class="c1"># right result instance for chord_unlock etc.
+</span>        <span class="n">results</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">_freeze_unroll</span><span class="p">(</span>
+            <span class="n">new_tasks</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">chord</span><span class="p">,</span> <span class="n">root_id</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">,</span>
+        <span class="p">))</span>
+        <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">tasks</span><span class="p">,</span> <span class="n">MutableSequence</span><span class="p">):</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">tasks</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">new_tasks</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="n">new_tasks</span>
+    <span class="k">return</span> <span class="n">gid</span><span class="p">,</span> <span class="n">results</span>
+</code></pre></div></div>
+<p>실제로 동작시켜보면, <code class="language-plaintext highlighter-rouge">if isinstance(self.tasks, _regen):</code> 부분에서 true가 되어, 해당 부분에 있는 코드가 실행된다.
+results는 결과정보를 추적하기 위해 만들어놓은것으로 추정되었고, <code class="language-plaintext highlighter-rouge">self.tasks</code>에는 실행해야할 task 정보가 담겨있다.
+여기서 문제가 되는 부분은 <code class="language-plaintext highlighter-rouge">self.tasks = regen(x[0] for x in zip(tasks2, results))</code> 였다.
+<code class="language-plaintext highlighter-rouge">Backend.apply_chord</code> method에서 <code class="language-plaintext highlighter-rouge">GroupResult</code> 인스턴스가 만들어 질 때, results가 평가되며, <code class="language-plaintext highlighter-rouge">zip(tasks2, results)</code> 에 영향을 준 것이다.
+따라서, 해당 시점에 만약, <code class="language-plaintext highlighter-rouge">zip([0,1,2,3], [0,1,2,3])</code> 이라면, 실제로 task들이 message 큐를 전송할 때 즈음엔, <code class="language-plaintext highlighter-rouge">zip([0,1,2,3],[0,1])</code> 이 되면서 앞의 2개를 빼고 나머지 task들이 모두 사라지는 것이었다.</p>
 
-&lt;ul&gt;
-  &lt;li&gt;가장 익숙한 DB여서 채택하였다. 굳이 새로운 것을 쓴다면, Postgresql라는 선택지가 있기 했었겠지만, 해당 DB의 특별한 기능같은 것을 사용하지는 않을것 같아서, 쓰던 것을 채택하였다.&lt;/li&gt;
-&lt;/ul&gt;
+<h3 id="왜-2개만-남기고-나머지만-사라졌는가">왜 2개만 남기고 나머지만 사라졌는가?</h3>
+<p><code class="language-plaintext highlighter-rouge">run</code> method에서 <code class="language-plaintext highlighter-rouge">if header.tasks</code> 가 실행될 때, 앞의 2개에 대해선 이미 실행이 되었기 때문으로 추측된다.
+실제로, stack을 일일히 찍어보면, 해당 지점에서 2개가 미리 평가된다.</p>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="Python" /><category term="Python, Celery" /><summary type="html"><![CDATA[Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그]]></summary></entry><entry><title type="html">Python Gunicorn multiproessing 멈춤현상</title><link href="http://localhost:4000/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/" rel="alternate" type="text/html" title="Python Gunicorn multiproessing 멈춤현상" /><published>2022-06-26T00:00:00+09:00</published><updated>2022-06-26T18:46:00+09:00</updated><id>http://localhost:4000/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81</id><content type="html" xml:base="http://localhost:4000/python/Python-Gunicorn-multiprocessing-%EB%A9%88%EC%B6%A4%ED%98%84%EC%83%81/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">gunicorn으로 multiprocessing.pool을 이용할 때, sub processs에서 에러 발생시, 해당 요청이 프리징이 걸리는 현상에 대한 확인</span>
+</code></pre></div></div>
 
-&lt;p&gt;ORM(Object Relational Mapping) : &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;typeORM&lt;/code&gt;&lt;/p&gt;
+<h1 id="발생환경">발생환경</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Python 3.6.15
+django 2.2
+gunicorn 20.x
+</code></pre></div></div>
 
-&lt;ul&gt;
-  &lt;li&gt;이전부터 사용하면, 생산성이 좋아진다는 지인의 이야기에 ORM을 사용하여 프로젝트를 해보고 싶었다. 찾다보니, SequalizeORM을 처음에 사용하려 했는데, 같이 프로젝트 하던 분이 typeORM이라고 ts로 만들어진게 하나 있다고 하길래 하당 lib를 채택하였다.&lt;/li&gt;
-&lt;/ul&gt;
+<h1 id="현상">현상</h1>
+<p>gunicorn worker에서 만든 sub process에서 http 요청이 섞여있는 함수를 실행하다가 익셉션 발생시, 만들어진 sub process가 멈춤.<br />
+정확히는 Pool에 들어간 작업이 모두 끝나서 pool.terminate() 동작에 들어갔으나, sub process(os.waitpid로 무한정 대기)가 종료되질 않아서 무한정 대기함.</p>
 
-&lt;p&gt;DOC : &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apiDoc&lt;/code&gt;&lt;/p&gt;
+<h1 id="현상-발생-조건-확인">현상 발생 조건 확인</h1>
+<p>sub process에서 <code class="language-plaintext highlighter-rouge">exception.__traceback__</code>이 반환된다면, 항상 발생한다. ( raise, return 모두 동일함 )</p>
 
-&lt;ul&gt;
-  &lt;li&gt;API가 나왔을 때 문서를 일일히 새로 작성하는것은 너무 불편한 작업이며, 쉽게 빼먹을 수 있는 작업이라 생각한다. 가장 좋은 것은 코드단에서 주석에 API정보를 나열해 놓으면, 빌드단에서 해당 apiDOC을 알아서 뽑아주는 것이 베스트라 생각했기에, apiDoc을 채택하였다.&lt;/li&gt;
-&lt;/ul&gt;
+<h1 id="해결">해결</h1>
+<p>sub process에서 try catch로 내부의 모든 익셉션을 잡은 뒤, 해당 익셉션에 대해 Wrapping 클래스를 만들어서 해당 정보를 넣어준 뒤, return 하도록 함.<br />
+그리고 <code class="language-plaintext highlighter-rouge">exception.__traceback__</code>에 대해서는 문자열로 변경하여 반환함.<br />
+그 뒤, pool쪽에서 반환된 인스턴스의 타입을 체크하여, 에러인 것이 왔으면, worker process에서 raise하도록 처리함.</p>
 
-&lt;h1 id=&quot;2-개발기&quot;&gt;2. 개발기&lt;/h1&gt;
+<p>example)</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">traceback</span>
 
-&lt;h2 id=&quot;시작&quot;&gt;시작&lt;/h2&gt;
-&lt;p&gt;당시에 뭔가 정확한 기획 없이 즉석으로 시작했었던 프로젝트라, 최소한의 간단한 기능들에 대해서만 DB를 설계하고 시작하였다.&lt;br /&gt;
-해당 DB 테이블 구조는 깃허브의 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;schema.png&lt;/code&gt;파일을 보면 된다. 기억상으론 초창기에 몇번 수정하고, 이후에는 수정하지 않았던걸로 기억한다.&lt;br /&gt;
-DB Schema들을 모두 짠 후, 같이 진행하던 팀원들의 피드백을 받은 이후에 바로 개발에 들어갔다. 당시 기획1, 백1, 프론트2 형태로 팀을 구성했어서, 최대한 빠르게 기능을 뽑아내야 프론트 개발자들이 개발을 할 수 있기 때문이다.&lt;/p&gt;
+<span class="k">class</span> <span class="nc">MPExceptionWrapper</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">error_type</span><span class="p">,</span> <span class="n">error_args</span><span class="p">,</span> <span class="n">traceback_info</span><span class="p">):</span>
+        <span class="n">this</span><span class="p">.</span><span class="n">error_type</span> <span class="o">=</span> <span class="n">error_type</span>
+        <span class="n">this</span><span class="p">.</span><span class="n">error_args</span> <span class="o">=</span> <span class="n">error_args</span>
+        <span class="n">this</span><span class="p">.</span><span class="n">traceback_info</span> <span class="o">=</span> <span class="n">traceback_info</span>
 
-&lt;h2 id=&quot;orm-사용-및-개발&quot;&gt;ORM 사용 및 개발&lt;/h2&gt;
-&lt;p&gt;최초로 작업한 것은 DB Schema Table들을 class 형태로 만드는 것이었다.&lt;br /&gt;
-해당 작업은 크게 어렵지 않았다.&lt;br /&gt;
-Hook은 매우 유용한 기능이라 생각이 들었었다.&lt;br /&gt;
-프로젝트 내에서 사용 사례는 비밀번호를 설정할때, Hook에서 해당 비밀번호의 유효성을 검증하는데 사용했었다.&lt;br /&gt;
-하지만, 해당 부분은 로직이니, Model단과 분리되는게 맞지않을까? 라는 생각이들긴 했었으나, 처음 ORM을 써보는 만큼여러가지 시도를 해보겠다는 생각과 ORM이니 해당 위치에 넣는게 맞지않을까라는 생각에 검증의 위치를 옮기지는 않았다. 패스워드의 유효성을 검증하는 것은 유저 객체가 해야되는 일중 하나라고 생각이 든다.&lt;/p&gt;
+<span class="c1"># in multi processing function wrapper
+# this function called by sub process ( created by worker )
+</span><span class="k">def</span> <span class="nf">mp_function_wrapper</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nf">function</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">except</span> <span class="nb">BaseException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nc">MPExceptionWrapper</span><span class="p">(</span><span class="nf">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">e</span><span class="p">.</span><span class="n">args</span><span class="p">,</span> <span class="n">traceback</span><span class="p">.</span><span class="nf">format_exc</span><span class="p">())</span>
+</code></pre></div></div>
 
-&lt;h2 id=&quot;자동배포&quot;&gt;자동배포&lt;/h2&gt;
-&lt;p&gt;여러가지 기능을 구현하다가, 같이 프로젝트 하는 분들과 회의에서 소스코드 커밋시, 자동 업데이트 기능이 있으면 괜찮을것 같다는 이야기에 해당 기능도 간단하게나마 구현하였다.&lt;br /&gt;
-커밋을 할 떄마다 id/password로 ssh에 접근하여, 미리 작성해둔 스크립트를 실행하도록 하였고, 해당 스크립트에는 github 소스코드를 pull하도록 구현하였다.&lt;br /&gt;
-그 뒤 nodemon에서 소스코드 변화를 감지하고, 서버를 재컴파일 &amp;amp; 실행하였고, doc에도 변경사항이 정상적으로 적용되었다.
-비록 CI/CD 툴을 사용해서 적용한 것은 아니지만, 만들어놓고나니, 아주 편리한 기능이라는 것을 깨닫게 되었다.&lt;/p&gt;
+<h1 id="추가-확인">추가 확인</h1>
+<p>이후, 별도로 확인해본 결과, Python3.6 Python3.7에서 발생함<br />
+둘 모두 지원 종료된 버전이므로 별도로 Gunicorn소스 까보며 확인하진 않음.</p>
 
-&lt;h2 id=&quot;테스트&quot;&gt;테스트&lt;/h2&gt;
-&lt;p&gt;테스트를 작성하며 작업한다라는 것은 실패하였다.&lt;br /&gt;
-일단, 테스트를 할 때, DB에 의존적이지 않게 테스트를 진행해야 된다는 생각을 가지고 있기 때문에, 해당 방법을 찾아보며 적용하다가 결국 실패하여, 적용을 아에 못했기 때문이다.&lt;br /&gt;
-그냥, 테스트용 DB를 도커로 띄운 후에 기본 데이터를 넣고 테스트하도록 하였다.&lt;br /&gt;
-해당 테스트도 개발도중, API호출을 하지 않고 편하게 개발하기 위함인거지, 테스트목적은 아니었다.&lt;/p&gt;
+<h1 id="증상-확인용으로-사용했던-코드">증상 확인용으로 사용했던 코드</h1>
 
-&lt;hr /&gt;
-&lt;p&gt;결국 프로젝트는 서로 바빠지면서 접게 되었지만, 다음에 토이를 하게 되면, 꼭 테스트코드를 작성하며 작업해야겠다.&lt;/p&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="Develop" /><category term="ts" /><summary type="html">LawDocOffice Server 개발기(토이, ts)</summary></entry><entry><title type="html">PUT Method로 파일 업로드</title><link href="https://jihwankim.github.io/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C/" rel="alternate" type="text/html" title="PUT Method로 파일 업로드" /><published>2021-06-18T00:00:00+09:00</published><updated>2021-06-18T08:01:00+09:00</updated><id>https://jihwankim.github.io/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C</id><content type="html" xml:base="https://jihwankim.github.io/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;Put Method를 통한 파일 업로드&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">temp</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="n">requests</span>
+    <span class="n">URL</span> <span class="o">=</span> <span class="sh">'</span><span class="s">https://www.naver.com</span><span class="sh">'</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s"> / </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="nc">Exception</span><span class="p">(</span><span class="sh">'</span><span class="s">hello</span><span class="sh">'</span><span class="p">)</span>
 
-&lt;p&gt;Flutter 작업도중, 서버단에서 S3에 파일을 업로드를 할 때, SignedURL로 직접 올리도록 구현해놔서, PUT METHOD로 파일을 직접 올려야 할 일이 있었다.&lt;br /&gt;
-하지만, 찾아보니, 대부분 Multipart로 업로드하는 방법에 대해서만 기술해놔서, 해당 코드를 블로그에 기록한다.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-Dart&quot;&gt;Future&amp;lt;bool&amp;gt; uploadImage(File file, String uploadURL) async {
+<span class="k">def</span> <span class="nf">runner</span><span class="p">():</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">rs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">test_set</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+        <span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)),</span>
+        <span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,)),</span>
+        <span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)),</span>
+        <span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,)),</span>
+    <span class="p">]</span>
+    <span class="k">with</span> <span class="nc">Pool</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="n">pools</span><span class="p">:</span>
+        <span class="nf">for </span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="ow">in</span> <span class="n">test_set</span><span class="p">:</span>
+            <span class="n">items</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">pools</span><span class="p">.</span><span class="nf">apply_async</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="n">rs</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">item</span><span class="p">.</span><span class="nf">get</span><span class="p">())</span>
+</code></pre></div></div>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="Python" /><category term="Python, Djnago, Gunicorn" /><summary type="html"><![CDATA[gunicorn으로 django 실행시, multiprocessing 사용해서 만든 sub process에서 에러 발생시, sub 프로세스가 멈추는 현상.]]></summary></entry><entry><title type="html">Flutter로 게임 만들기</title><link href="http://localhost:4000/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/" rel="alternate" type="text/html" title="Flutter로 게임 만들기" /><published>2022-06-26T00:00:00+09:00</published><updated>2022-06-26T17:23:00+09:00</updated><id>http://localhost:4000/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0</id><content type="html" xml:base="http://localhost:4000/flutter/Flutter%EB%A1%9C-%EA%B2%8C%EC%9E%84-%EB%A7%8C%EB%93%A4%EA%B8%B0/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Flutter로 게임 만들기</span>
+</code></pre></div></div>
+
+<h1 id="게임을-만들게-된-이유">게임을 만들게 된 이유</h1>
+<p>이전부터 게임하나를 만들어볼까 생각하고 있었는데, 마침 회사 창립 기념일 공모전이 열렸고, 해당 게임을 개발하여 응모하였다.</p>
+
+<h1 id="기술-스택">기술 스택</h1>
+<p>Client</p>
+<ul>
+  <li>Flutter</li>
+  <li>GetX ( Flutter State manager )</li>
+  <li>Flame ( Flutter Game Engine )</li>
+</ul>
+
+<p>Server</p>
+<ul>
+  <li>AWS Lambda</li>
+  <li>AWS EventBridge</li>
+  <li>MySQL</li>
+  <li>Firebase Auth</li>
+</ul>
+
+<h1 id="걸린-시간">걸린 시간</h1>
+<p>총 3일 걸렸다. (Asset 검색 + 도트찍기 1일 / 개발 2일)</p>
+
+<h1 id="github-repo-link">Github Repo Link</h1>
+<p>https://github.com/JihwanKim/run_kkomi_public</p>
+
+<h1 id="게임">게임</h1>
+<p><strong>만약, 게임 로딩이 되지 않는다면 새로고침 하세요!</strong></p>
+<iframe src="../../../assets/kkomi_run/index.html" width="500" height="500"></iframe>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="Flutter" /><category term="Flutter, Flame" /><summary type="html"><![CDATA[회사 창립기념일 기념 공모전에 제출할 게임을 만들다]]></summary></entry><entry><title type="html">Python Object 쪼개보기</title><link href="http://localhost:4000/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/" rel="alternate" type="text/html" title="Python Object 쪼개보기" /><published>2022-03-09T00:00:00+09:00</published><updated>2022-03-10T07:26:00+09:00</updated><id>http://localhost:4000/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0</id><content type="html" xml:base="http://localhost:4000/python/Python-Dict-%EC%AA%BC%EA%B0%9C%EB%B3%B4%EA%B8%B0/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Python Object 쪼개보기</span>
+</code></pre></div></div>
+
+<h1 id="찾아본-이유">찾아본 이유</h1>
+<p>이번에 이직한 회사에서 Python을 쓰고 있는데, Dictionary 자료형의 기본크기는 몇이며, 얘는 어떻게 동작하고 그리고 크기 증가 전략은 어떤것인지 궁금해서 알아보게 되었다.</p>
+
+<h1 id="python-dictionary는-무엇인가">Python Dictionary는 무엇인가?</h1>
+<p>CPython Repo =&gt; Objects/dictobject.c line 1</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Dictionary object implementation using a hash table
+</code></pre></div></div>
+
+<h2 id="memory-layout">memory Layout</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>+---------------------+
+| dk_refcnt           |
+| dk_log2_size        |
+| dk_log2_index_bytes |
+| dk_kind             |
+| dk_usable           |
+| dk_nentries         |
++---------------------+
+| dk_indices[]        |
+|                     |
++---------------------+
+| dk_entries[]        |
+|                     |
++---------------------+
+</code></pre></div></div>
+<p>dk_indices=&gt;  엔트리에 있는 데이터의 위치값이 저장되어 있음. 배열에는 실제 데이터, DKIX_EMPTY(-1) or DKIX_DUMMY(-2) 중 하나가 들어가 있음. 가득차면 2배로 증가. 실제해시테이블 사이즈</p>
+
+<h3 id="_dictkeysobject">_dictkeysobject</h3>
+
+<p>dk_refcnt =&gt; gc용 레퍼카운터인듯.<br />
+dk_log2_size =&gt; 해시테이블(indices) 크기. 2의 지수배로 증가함.<br />
+dk_log2_index_bytes =&gt; 해시테이블 바이트사이즈<br />
+dk_kind =&gt; 키 종류<br />
+dk_version =&gt; 버전값. 어떤 키값이 수정되면 0으로 수정함.<br />
+dk_usable =&gt; 사용가능한 entries 공간크기.<br />
+dk_nentries =&gt; 실제 사용하고있는 entries 공간 크기<br />
+dk_indices =&gt; 인덱스가 저장되는 실제 배열.</p>
+<ul>
+  <li>상세 &gt; char dk_indices[];  /* char is required to avoid strict aliasing. */</li>
+</ul>
+
+<h3 id="_dictvalues">_dictvalues</h3>
+<p>/* Layout of dict values:
+ *</p>
+<ul>
+  <li>The PyObject *values are preceded by an array of bytes holding</li>
+  <li>the insertion order and size.</li>
+  <li>[-1] = prefix size. [-2] = used size. size[-2-n…] = insertion order.
+ */
+struct _dictvalues {
+ PyObject *values[1];
+};</li>
+</ul>
+
+<p>Size of indices is dk_size.  Type of each index in indices is vary on dk_size:</p>
+
+<ul>
+  <li>int8  for          dk_size &lt;= 128</li>
+  <li>int16 for 256   &lt;= dk_size &lt;= 2**15</li>
+  <li>int32 for 2<strong>16 &lt;= dk_size &lt;= 2</strong>31</li>
+  <li>int64 for 2**32 &lt;= dk_size</li>
+</ul>
+
+<h1 id="파이썬-해시함수">파이썬 해시함수</h1>
+<p>해시함수는 일반적으로 랜덤성이 좋아야 좋음.
+하지만, 파이썬에서는 인트에대해선 규칙적임. (확인해보니, 1=&gt;1 2=&gt;2 이런식으로 나옴.)</p>
+
+<h1 id="충돌">충돌</h1>
+<p>해시값 충돌시, 아래 알고리즘을 통해 다음에 저장될 인덱스를 지정함.</p>
+
+<p>만약, 선형 프로빙으로 저장한다면, 인덱스가 연속될경우, 치명적임.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>j = ((5*j) + 1) mod 2**i
+</code></pre></div></div>
+
+<p>따라서, 연속적인 인덱스에 저장하지 않고, 아래 알고리즘을 통해 다음인덱스를 결정함.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>perturb &gt;&gt;= PERTURB_SHIFT;
+j = (5*j) + 1 + perturb;
+use j % 2**i as the next table index;
+</code></pre></div></div>
+
+<h1 id="증가-비율">증가 비율</h1>
+
+<p>/* GROWTH_RATE. Growth rate upon hitting maximum load.</p>
+<ul>
+  <li>Currently set to used*3.</li>
+  <li>This means that dicts double in size when growing without deletions,</li>
+  <li>but have more head room when the number of deletions is on a par with the</li>
+  <li>number of insertions.  See also bpo-17563 and bpo-33205.
+ *</li>
+  <li>GROWTH_RATE was set to used*4 up to version 3.2.</li>
+  <li>GROWTH_RATE was set to used*2 in version 3.3.0</li>
+  <li>GROWTH_RATE was set to used*2 + capacity/2 in 3.4.0-3.6.0.
+ */</li>
+</ul>
+
+<p>/* Number of items in the dictionary <em>/
+ #define GROWTH_RATE(d) ((d)-&gt;ma_used</em>3)</p>
+
+<p># 클리어시킬때
+ This immutable, empty PyDictKeysObject is used for PyDict_Clear()
+ 빈거가져다가씀?</p>
+
+<p># 인덱스 룩업</p>
+
+<p>index =&gt; 해당 키값이 저장된 위치 ( 충돌여부 안보고 해당위치 일단찾음)
+hash =&gt; 해당 키값 해쉬돌린 결과값
+비었으면 -1임. ( DKIX_EMPTY )</p>
+<pre><code class="language-C">static Py_ssize_t
+lookdict_index(PyDictKeysObject *k, Py_hash_t hash, Py_ssize_t index)
+{
+    size_t mask = DK_MASK(k);
+    size_t perturb = (size_t)hash;
+    size_t i = (size_t)hash &amp; mask;
+
+    for (;;) {
+        Py_ssize_t ix = dictkeys_get_index(k, i);
+        if (ix == index) {
+            return i;
+        }
+        if (ix == DKIX_EMPTY) {
+            return DKIX_EMPTY;
+        }
+        perturb &gt;&gt;= PERTURB_SHIFT;
+        i = mask &amp; (i*5 + perturb + 1);
+    }
+    Py_UNREACHABLE();
+}
+</code></pre>
+
+<p>딕셔너리는 키, 값, 사용하고있는 공간값, 버전정보 ( 해당값은 해시테이블 만들어지거나 값이 수정될때증가? )</p>
+
+<p>insertdict
+insert_to_emptydict</p>
+
+<p>버전갱신이유 ? 왜 ?</p>
+
+<p>/* USABLE_FRACTION is the maximum dictionary load.</p>
+<ul>
+  <li>Increasing this ratio makes dictionaries more dense resulting in more</li>
+  <li>collisions.  Decreasing it improves sparseness at the expense of spreading</li>
+  <li>indices over more cache lines and at the cost of total memory consumed.
+ *</li>
+  <li>USABLE_FRACTION must obey the following:</li>
+  <li>(0 &lt; USABLE_FRACTION(n) &lt; n) for all n &gt;= 2
+ *</li>
+  <li>USABLE_FRACTION should be quick to calculate.</li>
+  <li>Fractions around 1/2 to 2/3 seem to work well in practice.
+ */
+#define USABLE_FRACTION(n) (((n) « 1)/3)</li>
+</ul>
+
+<h3 id="딕-사이즈-계산">딕 사이즈 계산</h3>
+
+<h4 id="프리사이즈">프리사이즈</h4>
+<p>PyDict_LOG_MINSIZE == 3 ? 2 « 3 할 경우, 8임.
+딕 사이즈는 기본 8 반환</p>
+
+<p>max presize =&gt; 2^(17 + 1)임.
+아이템 개수가 2^(17+1) * 2 / 3보다 크면, 그냥 크기를 2^17 사용
+넘지않을경우, 사이즈대로 반환 =&gt; (크기 * 3 +1) / 2
+(크기 아이템 미리할당)</p>
+
+<p>log2_size =&gt; 지수사이즈 ?</p>
+
+<p>_Py_bit_length &gt; 현재값보다 크고 가장 가까운 지수 구함.
+(사용사이즈 * 3 + 1) / 2 &lt; 2^x
+지수를 구해야함.</p>
+
+<p>ex)
+1, 2 &lt; 2^x, x = 2 =&gt; 2
+2, 3.5 &lt; 2^x, x = 2 =&gt; 2</p>
+
+<p>10, 15.5 &lt; 2^x, x = 4 =&gt; 4</p>
+
+<p>entry_size =&gt; 유니코드 키값일경우, PyObject * 2 포인터
+            =&gt; 그외값, PyObject * 2 포인터 + 파이썬 기본사이즈(?)</p>
+
+<p>log2_bytes =&gt;</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    if (log2_size &lt; 8) {
+        log2_bytes = log2_size;
+    }
+    else if (log2_size &lt; 16) {
+        log2_bytes = log2_size + 1;
+    }
+#if SIZEOF_VOID_P &gt; 4 ( 64비트 운영체제 기준)
+    else if (log2_size &gt;= 32) {
+        log2_bytes = log2_size + 3;
+    }
+#endif
+    else {
+        log2_bytes = log2_size + 2;
+    }
+</code></pre></div></div>
+<p>usable =&gt; USABLE_FRACTION(1«log2_size);</p>
+
+<p>최종 사이즈 ? 
+        dk = PyObject_Malloc(sizeof(PyDictKeysObject)
+                             + ((size_t)1 « log2_bytes)
+                             + entry_size * usable);</p>
+
+<p>최종.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    dk-&gt;dk_refcnt = 1;
+    dk-&gt;dk_log2_size = log2_size;
+    dk-&gt;dk_log2_index_bytes = log2_bytes;
+    dk-&gt;dk_kind = unicode ? DICT_KEYS_UNICODE : DICT_KEYS_GENERAL;
+    dk-&gt;dk_nentries = 0;
+    dk-&gt;dk_usable = usable;
+    dk-&gt;dk_version = 0;
+    memset(&amp;dk-&gt;dk_indices[0], 0xff, ((size_t)1 &lt;&lt; log2_bytes));
+    memset(&amp;dk-&gt;dk_indices[(size_t)1 &lt;&lt; log2_bytes], 0, entry_size * usable);
+    return dk;
+</code></pre></div></div>
+
+<p>비어있을경우 기본 키 형태</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+static PyDictKeysObject empty_keys_struct = {
+        1, /* dk_refcnt */
+        0, /* dk_log2_size */
+        0, /* dk_log2_index_bytes */
+        DICT_KEYS_UNICODE, /* dk_kind */
+        1, /* dk_version */
+        0, /* dk_usable (immutable) */
+        0, /* dk_nentries */
+        {DKIX_EMPTY, DKIX_EMPTY, DKIX_EMPTY, DKIX_EMPTY,
+         DKIX_EMPTY, DKIX_EMPTY, DKIX_EMPTY, DKIX_EMPTY}, /* dk_indices */
+};
+
+</code></pre></div></div>
+
+<p>파이썬 메모리 할당시, 오브젝트 기본 사이즈 + 타입을 위한 사이즈 만큼 잡고, gc에는 타입을 위한 사이즈 위치에 대해 링크를 검(?)</p>
+
+<p>gc head</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>typedef struct {
+    // Pointer to next object in the list.
+    // 0 means the object is not tracked
+    uintptr_t _gc_next;
+
+    // Pointer to previous object in the list.
+    // Lowest two bits are used for flags documented later.
+    uintptr_t _gc_prev;
+} PyGC_Head;
+</code></pre></div></div>
+
+<p>gc가 안돌고 있다면, young 세대의 한계점의 개수가 현재 개수보다 많다면, gc돔. 대충이정도만 알면될듯?</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>void
+_PyObject_GC_Link(PyObject *op)
+{
+    PyGC_Head *g = AS_GC(op);
+    assert(((uintptr_t)g &amp; (sizeof(uintptr_t)-1)) == 0);  // g must be correctly aligned
+
+    PyThreadState *tstate = _PyThreadState_GET();
+    GCState *gcstate = &amp;tstate-&gt;interp-&gt;gc;
+    g-&gt;_gc_next = 0;
+    g-&gt;_gc_prev = 0;
+    gcstate-&gt;generations[0].count++; /* number of allocated GC objects */
+    if (gcstate-&gt;generations[0].count &gt; gcstate-&gt;generations[0].threshold &amp;&amp;
+        gcstate-&gt;enabled &amp;&amp;
+        gcstate-&gt;generations[0].threshold &amp;&amp;
+        !gcstate-&gt;collecting &amp;&amp;
+        !_PyErr_Occurred(tstate))
+    {
+        gcstate-&gt;collecting = 1;
+        gc_collect_generations(tstate);
+        gcstate-&gt;collecting = 0;
+    }
+}
+</code></pre></div></div>
+
+<p>오브젝트를 만들때마다 gc를 돌릴지 체크함.
+즉, 주기적으로 도는게아니란뜻.</p>
+
+<p>메모리 할당 실패했을경우, 할당해둔 key들 밀어버림.</p>
+
+<p>파이썬에서 dict은 삭제하면 현재 프리갯수가 80개 이하라면, 그곳에 저장하고, 80개가 넘어가면 free해버림.</p>
+
+<p>배열로서, 스택형태로 되어있음.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="mi">4379980224</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">del</span> <span class="n">d</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="mi">4379980224</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">del</span> <span class="n">d</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d1</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span>
+<span class="mi">4379980224</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">del</span> <span class="n">d1</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d1</span>
+<span class="nc">Traceback </span><span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="sh">"</span><span class="s">&lt;stdin&gt;</span><span class="sh">"</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+<span class="nb">NameError</span><span class="p">:</span> <span class="n">name</span> <span class="sh">'</span><span class="s">d1</span><span class="sh">'</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">defined</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d2</span> <span class="o">=</span> <span class="p">{</span><span class="sh">'</span><span class="s">a</span><span class="sh">'</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="sh">'</span><span class="s">b</span><span class="sh">'</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="sh">'</span><span class="s">c</span><span class="sh">'</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="sh">'</span><span class="s">d</span><span class="sh">'</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="sh">'</span><span class="s">e</span><span class="sh">'</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="sh">'</span><span class="s">f</span><span class="sh">'</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span><span class="sh">'</span><span class="s">g</span><span class="sh">'</span><span class="p">:</span><span class="mi">7</span><span class="p">,</span><span class="sh">'</span><span class="s">h</span><span class="sh">'</span><span class="p">:</span><span class="mi">8</span><span class="p">,</span><span class="sh">'</span><span class="s">i</span><span class="sh">'</span><span class="p">:</span><span class="mi">9</span><span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
+<span class="mi">4379980224</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">len</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
+<span class="mi">9</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
+<span class="mi">4379980224</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">del</span> <span class="n">d2</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d3</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d3</span><span class="p">)</span>
+<span class="mi">4379980224</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d4</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d4</span><span class="p">)</span>
+<span class="mi">4379980352</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">del</span> <span class="n">d4</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">del</span> <span class="n">d3</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d5</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d5</span><span class="p">)</span>
+<span class="mi">4379980224</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d6</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">id</span><span class="p">(</span><span class="n">d6</span><span class="p">)</span>
+<span class="mi">4379980352</span>
+
+
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* There are no strict guarantee that returned dict can contain minused
+* items without resize.  So we create medium size dict instead of very
+* large dict or MemoryError.
+</code></pre></div></div>
+
+<h2 id="pydict_getitem">PyDict_GetItem</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Note that, for historical reasons, PyDict_GetItem() suppresses all errors that may occur (originally dicts supported only string keys, and exceptions weren't possible).  So, while the original intent was that a NULL return meant the key wasn't present, in reality it can mean that, or that an error (suppressed) occurred while computing the key's hash, or that some error (suppressed) occurred when comparing keys in the dict's internal probe sequence.  A nasty example of the latter is when a Python-coded comparison function hits a stack-depth error, which can cause this to return NULL even if the key is present.
+
+
+역사적 이유로 PyDict_GetItem()은 발생할 수 있는 모든 오류를 억제합니다(원래 dicts는 문자열 키만 지원했으며 예외는 불가능했습니다). 따라서 원래 의도는 NULL 반환이 키가 없음을 의미하는 것이지만 실제로는 키의 해시를 계산하는 동안 오류(억제됨)가 발생했거나 비교할 때 일부 오류(억제됨)가 발생했음을 의미할 수 있습니다. dict의 내부 프로브 시퀀스에 있는 키. 후자의 불쾌한 예는 Python으로 코딩된 비교 함수가 스택 깊이 오류에 도달했을 때입니다. 이로 인해 키가 있더라도 NULL이 반환될 수 있습니다.
+
+
+</code></pre></div></div>
+
+<p>키는 기본사이즈일경우에만 reuse
+만약, 프리 키배열이 있다며 가져다가 ㅏㅅ용. 없으면 새로만듬.</p>
+
+<p>유니코드뿐인 테이블에, 유니코드가 아닌 데이터가 추가된다면, resize</p>
+
+<h1 id="resize">resize</h1>
+
+<p>/*
+Restructure the table by allocating a new table and reinserting all
+items again.  When entries have been deleted, the new table may
+actually be smaller than the old one.
+If a table is split (its keys and hashes are shared, its values are not),
+then the values are temporarily copied into the table, it is resized as
+a combined table, then the me_value slots in the old table are NULLed out.
+After resizing a table is always combined.</p>
+
+<p>This function supports:</p>
+<ul>
+  <li>Unicode split -&gt; Unicode combined or Generic</li>
+  <li>Unicode combined -&gt; Unicode combined or Generic</li>
+  <li>Generic -&gt; Generic
+*/</li>
+</ul>
+
+<p>키값이</p>
+
+<p>631</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">usable</span> <span class="o">=</span> <span class="n">USABLE_FRACTION</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">log2_size</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">log2_size</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">log2_bytes</span> <span class="o">=</span> <span class="n">log2_size</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">log2_size</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">log2_bytes</span> <span class="o">=</span> <span class="n">log2_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="cp">#if SIZEOF_VOID_P &gt; 4
+</span>    <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">log2_size</span> <span class="o">&gt;=</span> <span class="mi">32</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">log2_bytes</span> <span class="o">=</span> <span class="n">log2_size</span> <span class="o">+</span> <span class="mi">3</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="cp">#endif
+</span>    <span class="k">else</span> <span class="p">{</span>
+        <span class="n">log2_bytes</span> <span class="o">=</span> <span class="n">log2_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>1~7 ( min 3 )
+보면, log2_size가 2^7(128) 이하라면,  indices와 entries 할당량이 동일함. 즉, 변경전과 동일함. 지수값이 7일 때, 실제 사용 가능한 크기는 85.3</p>
+<ul>
+  <li>8~15
+2^15 (32768) 이하라면, indices가 entires의 2배임.</li>
+</ul>
+
+<p>16~31</p>
+
+<p>32~</p>
+
+<p>지수값별 사용가능한 크기
+| 지수 | indices 크기 | 사용가능 크기 / entries 크기 (2 ^ 지수 * 2 / 3) |
+| - | -|  - |
+| - | -(2^지수)- |  - |
+| 3  | 8  | 5.3 |
+| 4  | 16 | 10.6 |
+| 5  | 32  | 21.3 |
+| 6  | 64 |42.6 |
+| 7  | 128 |85.3 |
+| - | -(2^(지수+1))- |  - |
+| 8  | 512 | 170.6 |
+| 9  | 1024 | 341.3 |
+| 10  | 2048 | 682.6  |
+| 11  | 4096 | 1365.3  |
+| 12  |  8192 | 2730.6  |
+| 13  | 16384 | 5461.3  |
+| 14 | 32768 | 10922.6 |
+| 15|65536 | 21845.3 |
+| - | -(2^(지수+2))- |  - |
+| 16 | 262144 |  43690.6 |
+| 17 | 524288  | 87381.3  |
+| 18 | 1048576 | 174762.6  |
+| 19 |2097152 | 349525.3  |
+| 20 |4194304  | 699050.6  |
+| 21 |8388608  | 1398101.3  |
+| 22 | 16777216 | 2796202.6  |
+| 23 |33554432  |  5592405.3 |
+| 24 | 67108864 |  11184810.6 |
+| 25 | 134217728 | 22369621.3  |
+| 26 | 268435456 | 44739242.6  |
+| 27 | 536870912 | 89478485.3  |
+| 28 | 1073741824 | 178956970.6  |
+| 29 | 2147483648 | 357913941.3  |
+| 30 | 4294967296 | 715827882.6  |
+| 31 | 8589934592 |  1431655765.3 |
+| - | -|  - |
+| 32 | 34359738368 | 2863311530.6  |
+| … | … | …  |
+| - | -|  - |</p>
+
+<p>리사이즈시 사용중인 양의 3배로 늘어남. 그리고 큰값중 가장 가까운 2의 지수중에 선택.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+        dk = PyObject_Malloc(sizeof(PyDictKeysObject)
+                             + ((size_t)1 &lt;&lt; log2_bytes)
+                             + entry_size * usable);
+</code></pre></div></div>
+
+<p>young normal old ( 프리는 2세대에서만 비움 )</p>
+
+<p>usable = log2_size * 2 / 3</p>
+
+<p>아이템을 삭제해도 usable 카운트는 줄지않음. 
+계속해서 늘려가면서 데이터를 할당.\</p>
+
+<p>키값 유니코드만쓰다가 다른종류 쓰면, resize일어남. combine으로 변경!</p>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="Python" /><category term="Python, Dictionary, Cpython" /><summary type="html"><![CDATA[CPython을 까보고 Python Object는 어떻게 동작하는지 알아본다]]></summary></entry><entry><title type="html">ext_storage not found 문제 해결</title><link href="http://localhost:4000/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/" rel="alternate" type="text/html" title="ext_storage not found 문제 해결" /><published>2021-07-08T00:00:00+09:00</published><updated>2021-07-08T08:01:00+09:00</updated><id>http://localhost:4000/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0</id><content type="html" xml:base="http://localhost:4000/flutter/ext_storage-not-found-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">module 'ext_storage' not found 해결</span>
+</code></pre></div></div>
+
+<h1 id="문제-발생">문제 발생</h1>
+
+<p>CS용 어플리케이션 개발 이후, 내부 배포를 위해 TestFlight에 올리려고 헀는데, Archive를 돌릴 때마다, module ‘ext_storage’ not found에러가 발생했음.<br />
+(해당 에러는 개발모드를 빌드할 때는 발생하지 않았음.)</p>
+
+<p>해당 에러를 검색하고 적용해보니 정상적으로 동작했다.</p>
+
+<h1 id="해결방법">해결방법</h1>
+<p>xcode에서 <code class="language-plaintext highlighter-rouge">TARGETS-&gt;Runner-&gt;Deployment Info</code> 를 보면, IOS 9.0 으로 되어있는데, 11.0으로 변경하면 문제가해결된다.</p>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="Flutter" /><category term="Flutter" /><summary type="html"><![CDATA[module 'ext_storage' not found 해결]]></summary></entry><entry><title type="html">DB Charset 비일치로 인한 풀스캔 개선</title><link href="http://localhost:4000/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0/" rel="alternate" type="text/html" title="DB Charset 비일치로 인한 풀스캔 개선" /><published>2021-07-07T00:00:00+09:00</published><updated>2021-07-07T23:30:00+09:00</updated><id>http://localhost:4000/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0</id><content type="html" xml:base="http://localhost:4000/develop/DB-charset-%EB%B9%84%EC%9D%BC%EC%B9%98%EB%A1%9C-%EC%9D%B8%ED%95%9C-%ED%92%80%EC%8A%A4%EC%BA%94-%EA%B0%9C%EC%84%A0/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">문자열 불일치로 인한 풀스캔 수정기</span>
+</code></pre></div></div>
+
+<h1 id="문제-발견">문제 발견</h1>
+
+<ol>
+  <li>AWS slowQuery 로그 상에 특정 쿼리가 오래 걸리는 것을 발견함.</li>
+</ol>
+
+<h1 id="원인-분석">원인 분석</h1>
+
+<ol>
+  <li>해당 쿼리문과 테이블을 살펴보면, 풀스캔을 하지 않도록 정상적으로 인덱스가 걸려있고, 해당 인덱스를 조건으로 사용하고 있음.</li>
+  <li>Expain 해본 결과, 아래와 같이 조건 비교시, 다른 charset으로 convert하고 있음.
+ <img src="/assets/image/slow_query/convert.png" alt="image" /></li>
+  <li>따라서, 아래 쿼리문을 통해 charset값이 utf8mb4가 아닌것들을 조회함.
+    <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">SELECT</span> <span class="k">TABLE_NAME</span><span class="p">,</span> <span class="k">COLUMN_NAME</span><span class="p">,</span> <span class="n">COLUMN_TYPE</span><span class="p">,</span><span class="k">character_set_name</span><span class="p">,</span><span class="k">COLLATION_NAME</span> <span class="k">FROM</span> <span class="n">information_schema</span><span class="p">.</span><span class="nv">`COLUMNS`</span> <span class="k">C</span>
+ <span class="k">WHERE</span> <span class="n">table_schema</span> <span class="o">=</span> <span class="nv">"db"</span>
+ <span class="k">AND</span> <span class="k">character_set_name</span> <span class="o">!=</span> <span class="s1">'utf8mb4'</span>
+</code></pre></div>    </div>
+    <p><img src="/assets/image/slow_query/charset.png" alt="image" /></p>
+  </li>
+</ol>
+
+<h1 id="해결">해결</h1>
+
+<ol>
+  <li>charset이 <strong>utf8/ascii/laten1</strong> 인 것들을 <strong>utf8mb4</strong>로 변환함</li>
+  <li>풀스캔을 하지 않게 되서 쿼리 동작 속도가 빨라짐</li>
+</ol>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="Develop" /><category term="mysql" /><summary type="html"><![CDATA[Charset 불일치로 인한 풀스캔 수정기]]></summary></entry><entry><title type="html">LawDocOffice Server 개발기(토이, ts)</title><link href="http://localhost:4000/develop/LawDocOffice-%EC%84%9C%EB%B2%84-%EA%B0%9C%EB%B0%9C%EA%B8%B0/" rel="alternate" type="text/html" title="LawDocOffice Server 개발기(토이, ts)" /><published>2021-07-01T00:00:00+09:00</published><updated>2021-06-17T23:06:00+09:00</updated><id>http://localhost:4000/develop/LawDocOffice-%EC%84%9C%EB%B2%84-%EA%B0%9C%EB%B0%9C%EA%B8%B0</id><content type="html" xml:base="http://localhost:4000/develop/LawDocOffice-%EC%84%9C%EB%B2%84-%EA%B0%9C%EB%B0%9C%EA%B8%B0/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">LawDocOffice Server 개발기(토이, ts)</span>
+</code></pre></div></div>
+
+<p><a href="https://github.com/JihwanKim/law_office_server">Github Link</a></p>
+
+<p>개발기간<br />
+<strong>LawDocOffice 2020.10.27 ~ 2020.11.16</strong><br />
+<strong>LawSubAgent 2020.12.16 ~ 2020.12.30</strong></p>
+
+<p>과거 아는분과 기회가 되서, 간단한 토이를 진행했었는데, 작업을 했었던 것에 대한 기록이다.</p>
+
+<h1 id="사용햤던-기술">사용햤던 기술</h1>
+
+<p>언어 : <code class="language-plaintext highlighter-rouge">TypeScript</code></p>
+
+<ul>
+  <li>기존에 NodeJS를 간단하게 쓰고 있었는데, 타입이 추가되고 여러가지 부분에서 편해진 TypeScript가 요즘 괜찮다는 지인의 추천이 떠올라 해당 언어를 사용하도록 선택하였다.</li>
+</ul>
+
+<p>프레임워크 : <code class="language-plaintext highlighter-rouge">Express</code></p>
+
+<ul>
+  <li>기존에 AWS SAM을 적용하면서 예제에서 Express를 가지고 예제를 올려놨어서, 생소하지만, 다른 것들에 비해 그나마 제일 익숙해서 선택하였다.</li>
+</ul>
+
+<p>Node 프로세스 관리자 : <code class="language-plaintext highlighter-rouge">PM2</code></p>
+
+<ul>
+  <li>로컬에서 개발할때 매일 npm run ~~~ 을 치는것이 귀찮아서 백그라운드에 올려놓는 방법을 찾다가 채택하였다. 추가로 nodemon을 이용하여, 코드가 바뀌면 자동으로 재실행하게 구성하였다.</li>
+</ul>
+
+<p>DB : <code class="language-plaintext highlighter-rouge">MariaDB</code></p>
+
+<ul>
+  <li>가장 익숙한 DB여서 채택하였다. 굳이 새로운 것을 쓴다면, Postgresql라는 선택지가 있기 했었겠지만, 해당 DB의 특별한 기능같은 것을 사용하지는 않을것 같아서, 쓰던 것을 채택하였다.</li>
+</ul>
+
+<p>ORM(Object Relational Mapping) : <code class="language-plaintext highlighter-rouge">typeORM</code></p>
+
+<ul>
+  <li>이전부터 사용하면, 생산성이 좋아진다는 지인의 이야기에 ORM을 사용하여 프로젝트를 해보고 싶었다. 찾다보니, SequalizeORM을 처음에 사용하려 했는데, 같이 프로젝트 하던 분이 typeORM이라고 ts로 만들어진게 하나 있다고 하길래 하당 lib를 채택하였다.</li>
+</ul>
+
+<p>DOC : <code class="language-plaintext highlighter-rouge">apiDoc</code></p>
+
+<ul>
+  <li>API가 나왔을 때 문서를 일일히 새로 작성하는것은 너무 불편한 작업이며, 쉽게 빼먹을 수 있는 작업이라 생각한다. 가장 좋은 것은 코드단에서 주석에 API정보를 나열해 놓으면, 빌드단에서 해당 apiDOC을 알아서 뽑아주는 것이 베스트라 생각했기에, apiDoc을 채택하였다.</li>
+</ul>
+
+<h1 id="2-개발기">2. 개발기</h1>
+
+<h2 id="시작">시작</h2>
+<p>당시에 뭔가 정확한 기획 없이 즉석으로 시작했었던 프로젝트라, 최소한의 간단한 기능들에 대해서만 DB를 설계하고 시작하였다.<br />
+해당 DB 테이블 구조는 깃허브의 <code class="language-plaintext highlighter-rouge">schema.png</code>파일을 보면 된다. 기억상으론 초창기에 몇번 수정하고, 이후에는 수정하지 않았던걸로 기억한다.<br />
+DB Schema들을 모두 짠 후, 같이 진행하던 팀원들의 피드백을 받은 이후에 바로 개발에 들어갔다. 당시 기획1, 백1, 프론트2 형태로 팀을 구성했어서, 최대한 빠르게 기능을 뽑아내야 프론트 개발자들이 개발을 할 수 있기 때문이다.</p>
+
+<h2 id="orm-사용-및-개발">ORM 사용 및 개발</h2>
+<p>최초로 작업한 것은 DB Schema Table들을 class 형태로 만드는 것이었다.<br />
+해당 작업은 크게 어렵지 않았다.<br />
+Hook은 매우 유용한 기능이라 생각이 들었었다.<br />
+프로젝트 내에서 사용 사례는 비밀번호를 설정할때, Hook에서 해당 비밀번호의 유효성을 검증하는데 사용했었다.<br />
+하지만, 해당 부분은 로직이니, Model단과 분리되는게 맞지않을까? 라는 생각이들긴 했었으나, 처음 ORM을 써보는 만큼여러가지 시도를 해보겠다는 생각과 ORM이니 해당 위치에 넣는게 맞지않을까라는 생각에 검증의 위치를 옮기지는 않았다. 패스워드의 유효성을 검증하는 것은 유저 객체가 해야되는 일중 하나라고 생각이 든다.</p>
+
+<h2 id="자동배포">자동배포</h2>
+<p>여러가지 기능을 구현하다가, 같이 프로젝트 하는 분들과 회의에서 소스코드 커밋시, 자동 업데이트 기능이 있으면 괜찮을것 같다는 이야기에 해당 기능도 간단하게나마 구현하였다.<br />
+커밋을 할 떄마다 id/password로 ssh에 접근하여, 미리 작성해둔 스크립트를 실행하도록 하였고, 해당 스크립트에는 github 소스코드를 pull하도록 구현하였다.<br />
+그 뒤 nodemon에서 소스코드 변화를 감지하고, 서버를 재컴파일 &amp; 실행하였고, doc에도 변경사항이 정상적으로 적용되었다.
+비록 CI/CD 툴을 사용해서 적용한 것은 아니지만, 만들어놓고나니, 아주 편리한 기능이라는 것을 깨닫게 되었다.</p>
+
+<h2 id="테스트">테스트</h2>
+<p>테스트를 작성하며 작업한다라는 것은 실패하였다.<br />
+일단, 테스트를 할 때, DB에 의존적이지 않게 테스트를 진행해야 된다는 생각을 가지고 있기 때문에, 해당 방법을 찾아보며 적용하다가 결국 실패하여, 적용을 아에 못했기 때문이다.<br />
+그냥, 테스트용 DB를 도커로 띄운 후에 기본 데이터를 넣고 테스트하도록 하였다.<br />
+해당 테스트도 개발도중, API호출을 하지 않고 편하게 개발하기 위함인거지, 테스트목적은 아니었다.</p>
+
+<hr />
+<p>결국 프로젝트는 서로 바빠지면서 접게 되었지만, 다음에 토이를 하게 되면, 꼭 테스트코드를 작성하며 작업해야겠다.</p>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="Develop" /><category term="ts" /><summary type="html"><![CDATA[LawDocOffice Server 개발기(토이, ts)]]></summary></entry><entry><title type="html">PUT Method로 파일 업로드</title><link href="http://localhost:4000/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C/" rel="alternate" type="text/html" title="PUT Method로 파일 업로드" /><published>2021-06-18T00:00:00+09:00</published><updated>2021-06-18T08:01:00+09:00</updated><id>http://localhost:4000/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C</id><content type="html" xml:base="http://localhost:4000/flutter/PUT-METHOD%EB%A1%9C-%ED%8C%8C%EC%9D%BC%EC%97%85%EB%A1%9C%EB%93%9C/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Put Method를 통한 파일 업로드</span>
+</code></pre></div></div>
+
+<p>Flutter 작업도중, 서버단에서 S3에 파일을 업로드를 할 때, SignedURL로 직접 올리도록 구현해놔서, PUT METHOD로 파일을 직접 올려야 할 일이 있었다.<br />
+하지만, 찾아보니, 대부분 Multipart로 업로드하는 방법에 대해서만 기술해놔서, 해당 코드를 블로그에 기록한다.</p>
+
+<pre><code class="language-Dart">Future&lt;bool&gt; uploadImage(File file, String uploadURL) async {
   final dio = new Dio();
   final option = Options();
   option.headers = {
-    'Content-Type': &quot;image/${file.path.split(&quot;.&quot;).last}&quot;,
-    'Accept': &quot;*/*&quot;,
+    'Content-Type': "image/${file.path.split(".").last}",
+    'Accept': "*/*",
     'Content-Length': file.lengthSync().toString(),
     'Connection': 'keep-alive',
   };
@@ -122,633 +859,165 @@ Hook은 매우 유용한 기능이라 생각이 들었었다.&lt;br /&gt;
 
   await dio.put(
     uploadURL,
-    data: Stream.fromIterable(fileBytes.map((e) =&amp;gt; [e])),
+    data: Stream.fromIterable(fileBytes.map((e) =&gt; [e])),
     options: option,
   );
 }
-&lt;/code&gt;&lt;/pre&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="Flutter" /><category term="Flutter, AWS" /><summary type="html">Put Method를 통한 파일 업로드</summary></entry><entry><title type="html">FCM을 사용하면서 발생한 문제들</title><link href="https://jihwankim.github.io/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/" rel="alternate" type="text/html" title="FCM을 사용하면서 발생한 문제들" /><published>2021-06-17T00:00:00+09:00</published><updated>2021-06-17T23:06:00+09:00</updated><id>https://jihwankim.github.io/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4</id><content type="html" xml:base="https://jihwankim.github.io/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;FCM을 사용하면서 겪은 문제와 문제를 해결했던 방법.&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</code></pre>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="Flutter" /><category term="Flutter, AWS" /><summary type="html"><![CDATA[Put Method를 통한 파일 업로드]]></summary></entry><entry><title type="html">FCM을 사용하면서 발생한 문제들</title><link href="http://localhost:4000/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/" rel="alternate" type="text/html" title="FCM을 사용하면서 발생한 문제들" /><published>2021-06-17T00:00:00+09:00</published><updated>2021-06-17T23:06:00+09:00</updated><id>http://localhost:4000/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4</id><content type="html" xml:base="http://localhost:4000/develop/FCM-%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%EC%84%9C-%EB%B0%9C%EC%83%9D%ED%95%9C-%EB%AC%B8%EC%A0%9C%EB%93%A4/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">FCM을 사용하면서 겪은 문제와 문제를 해결했던 방법.</span>
+</code></pre></div></div>
 
-&lt;p&gt;FCM 을 사용하면서 겪은 문제와 해당 문제들을 어떻게 해결하였고, 앞으로 어떤 방식으로 사용을 해야할 지에 대해 고민했던 것들에 대한 글이다.&lt;/p&gt;
+<p>FCM 을 사용하면서 겪은 문제와 해당 문제들을 어떻게 해결하였고, 앞으로 어떤 방식으로 사용을 해야할 지에 대해 고민했던 것들에 대한 글이다.</p>
 
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;어디까지나 필자 개인의 경험을 기반으로 한 글이다.&lt;/code&gt;&lt;/p&gt;
+<p><code class="language-plaintext highlighter-rouge">어디까지나 필자 개인의 경험을 기반으로 한 글이다.</code></p>
 
-&lt;h1 id=&quot;1-fcm-push-topic_rate_exceeded-error&quot;&gt;1. FCM Push TOPIC_RATE_EXCEEDED error&lt;/h1&gt;
-&lt;p&gt;하나의 토픽에 많은 양의 데이터를 빠르게 전송하면, 해당 에러가 발생하며, 푸시를 더이상 할 수 없게 된다.&lt;/p&gt;
+<h1 id="1-fcm-push-topic_rate_exceeded-error">1. FCM Push TOPIC_RATE_EXCEEDED error</h1>
+<p>하나의 토픽에 많은 양의 데이터를 빠르게 전송하면, 해당 에러가 발생하며, 푸시를 더이상 할 수 없게 된다.</p>
 
-&lt;p&gt;해당 에러의 발생 사유는 아래와 같다.&lt;br /&gt;
-&lt;strong&gt;특정 주제의 구독자에게 전달되는 메시지 비율이 너무 높습니다. 이 주제로 보내는 메시지 수를 줄이세요. 바로 다시 보내도록 시도해서는 안 됩니다&lt;/strong&gt;&lt;/p&gt;
+<p>해당 에러의 발생 사유는 아래와 같다.<br />
+<strong>특정 주제의 구독자에게 전달되는 메시지 비율이 너무 높습니다. 이 주제로 보내는 메시지 수를 줄이세요. 바로 다시 보내도록 시도해서는 안 됩니다</strong></p>
 
-&lt;p&gt;단위토픽에 대해 전송되는 메세지의 개수를 줄여야 한다라는 문제가 생겼다.&lt;br /&gt;
-해당 문제를 해결한 방법은 아래와 같다.&lt;/p&gt;
+<p>단위토픽에 대해 전송되는 메세지의 개수를 줄여야 한다라는 문제가 생겼다.<br />
+해당 문제를 해결한 방법은 아래와 같다.</p>
 
-&lt;p&gt;해결당시 사용언어는 Erlang이며, Erlang의 특징은 분산처리 및 경량프로세스이며, 분산처리를 언어자체에서 지원을 해준다는 장점이 있다.&lt;br /&gt;
-따라서, 서버를 여러대 올려놨을때, 조금만 처리를 하게되면, 각 노드간 통신을 하게끔 하는 것은 매우매우 쉬운 일이다.&lt;br /&gt;
-Erlang에 보면 gen_server를 실행시킬 때, global로 등록할 것인지, local에 등록할 것인지 옵션을 통해 지정해 줄 수 있다.&lt;br /&gt;
-global로 실행시킨 다면, 통신하고 있는 노드들 중에서 동일한 이름의 gen_server는 오직 하나의 프로세스만 실행이 가능하다.&lt;br /&gt;
-해당 특성을 이용하여, push해야하는 topic 이름으로 gen_server를 실행시켜, 푸시 요청이 올 경우, 0.25초 마다 한번씩만 보내도록 하였다.&lt;br /&gt;
-해당 개수는 문서 상에서 FCM의 클라이언트 수신 가능한 최대 개수가 분당 240개. 시간당 5000개까지 제한하고 있다는 점에서 가져온 것이고, 실제로 토픽에 0.25초당 한번씩 보내게 되는 경우는 없을거라고 생각한다.&lt;/p&gt;
+<p>해결당시 사용언어는 Erlang이며, Erlang의 특징은 분산처리 및 경량프로세스이며, 분산처리를 언어자체에서 지원을 해준다는 장점이 있다.<br />
+따라서, 서버를 여러대 올려놨을때, 조금만 처리를 하게되면, 각 노드간 통신을 하게끔 하는 것은 매우매우 쉬운 일이다.<br />
+Erlang에 보면 gen_server를 실행시킬 때, global로 등록할 것인지, local에 등록할 것인지 옵션을 통해 지정해 줄 수 있다.<br />
+global로 실행시킨 다면, 통신하고 있는 노드들 중에서 동일한 이름의 gen_server는 오직 하나의 프로세스만 실행이 가능하다.<br />
+해당 특성을 이용하여, push해야하는 topic 이름으로 gen_server를 실행시켜, 푸시 요청이 올 경우, 0.25초 마다 한번씩만 보내도록 하였다.<br />
+해당 개수는 문서 상에서 FCM의 클라이언트 수신 가능한 최대 개수가 분당 240개. 시간당 5000개까지 제한하고 있다는 점에서 가져온 것이고, 실제로 토픽에 0.25초당 한번씩 보내게 되는 경우는 없을거라고 생각한다.</p>
 
-&lt;p&gt;기존에 작업했던 서버의 경우 주된 푸시 방법이 FCM이다. 또한, 데이터를 동기화하는데 이용하였다.&lt;br /&gt;
-하지만, 지금 생각해 보면, 메인 푸시를 FCM을 사용하는 것이 당시에는 최선의 방법이었을 수 있지만(필자가 1년도 안되었을 때, 다른분들이 결정하셨었다.), 지금은 아니라 생각한다. 주된 데이터를 동기화하는 방법으로는 맞지 않다고 생각한다.&lt;br /&gt;
-애초에 토픽에 0.25초당 하나씩 보내는 상황 자체를 만들지 않도록 구성하는 것이 옳은 방향이라 생각한다. &lt;br /&gt;
-따라서, 추후 FCM을 사용한다면, 어디까지나, 알람 용도로 사용해야 하지, 많은 데이터를 전송하는 용도로 사용하는 것은 경험상 좋진 않다고 생각한다. 데이터 전송이 많다면, 백그라운드는 굳이 돌리지 말고, 앱이 포그라운드일때, MQTT같은 것을 사용해서 데이터를 푸시받는게 옳은 방향이라 생각된다.&lt;/p&gt;
+<p>기존에 작업했던 서버의 경우 주된 푸시 방법이 FCM이다. 또한, 데이터를 동기화하는데 이용하였다.<br />
+하지만, 지금 생각해 보면, 메인 푸시를 FCM을 사용하는 것이 당시에는 최선의 방법이었을 수 있지만(필자가 1년도 안되었을 때, 다른분들이 결정하셨었다.), 지금은 아니라 생각한다. 주된 데이터를 동기화하는 방법으로는 맞지 않다고 생각한다.<br />
+애초에 토픽에 0.25초당 하나씩 보내는 상황 자체를 만들지 않도록 구성하는 것이 옳은 방향이라 생각한다. <br />
+따라서, 추후 FCM을 사용한다면, 어디까지나, 알람 용도로 사용해야 하지, 많은 데이터를 전송하는 용도로 사용하는 것은 경험상 좋진 않다고 생각한다. 데이터 전송이 많다면, 백그라운드는 굳이 돌리지 말고, 앱이 포그라운드일때, MQTT같은 것을 사용해서 데이터를 푸시받는게 옳은 방향이라 생각된다.</p>
 
-&lt;p&gt;만약, 이후 데이터를 FCM으로 받게 되는 일이 있다면, 도저히 시간이 나지 않는 상황이나, 데이터 전송이 자주 일어나지 않게 되는 경우에만 사용하게 될 것 같다.&lt;/p&gt;
+<p>만약, 이후 데이터를 FCM으로 받게 되는 일이 있다면, 도저히 시간이 나지 않는 상황이나, 데이터 전송이 자주 일어나지 않게 되는 경우에만 사용하게 될 것 같다.</p>
 
-&lt;p&gt;참고 링크&lt;br /&gt;
-&lt;a href=&quot;https://firebase.google.com/docs/cloud-messaging/concept-options#device_throttling&quot;&gt;단일 기기에 대한 최대 메시지 속도&lt;/a&gt;&lt;br /&gt;
-&lt;a href=&quot;https://firebase.google.com/docs/cloud-messaging/send-message?hl=ko#admin&quot;&gt;FCM 에러 목록&lt;/a&gt;&lt;/p&gt;
+<p>참고 링크<br />
+<a href="https://firebase.google.com/docs/cloud-messaging/concept-options#device_throttling">단일 기기에 대한 최대 메시지 속도</a><br />
+<a href="https://firebase.google.com/docs/cloud-messaging/send-message?hl=ko#admin">FCM 에러 목록</a></p>
 
-&lt;h1 id=&quot;2-동시에-여러명의-유저들에-대해-선별하여-알람보내기&quot;&gt;2. 동시에 여러명의 유저들에 대해 선별하여 알람보내기&lt;/h1&gt;
+<h1 id="2-동시에-여러명의-유저들에-대해-선별하여-알람보내기">2. 동시에 여러명의 유저들에 대해 선별하여 알람보내기</h1>
 
-&lt;p&gt;이전에 개발헀던 서비스의 서버에 보면, 여러명의 유저가 하나의 토픽을 함께 구독하고 있는 상황이 많고, 해당 토픽에 대해 공통적으로 알람을 보내야하는 경우가 있다.&lt;br /&gt;
-하지만, 유저에 따라, 알람을 켜놓거나 꺼놓을 수 있으므로, 해당 토픽으로 한번에 알람을 푸시하게 되면, 원하지 않는 유저가 알람을 받게 된다.&lt;br /&gt;
-따라서, 해당 부분에 대해서는 2가지 방법을 생각했었다.&lt;/p&gt;
+<p>이전에 개발헀던 서비스의 서버에 보면, 여러명의 유저가 하나의 토픽을 함께 구독하고 있는 상황이 많고, 해당 토픽에 대해 공통적으로 알람을 보내야하는 경우가 있다.<br />
+하지만, 유저에 따라, 알람을 켜놓거나 꺼놓을 수 있으므로, 해당 토픽으로 한번에 알람을 푸시하게 되면, 원하지 않는 유저가 알람을 받게 된다.<br />
+따라서, 해당 부분에 대해서는 2가지 방법을 생각했었다.</p>
 
-&lt;ol&gt;
-  &lt;li&gt;유저의 토큰을 서버에 저장하여, 알람을 끄지 않은 유저들에 대해서만 알람 전송&lt;/li&gt;
-  &lt;li&gt;데이터 푸시토픽과 알람토픽의 분리&lt;/li&gt;
-&lt;/ol&gt;
+<ol>
+  <li>유저의 토큰을 서버에 저장하여, 알람을 끄지 않은 유저들에 대해서만 알람 전송</li>
+  <li>데이터 푸시토픽과 알람토픽의 분리</li>
+</ol>
 
-&lt;p&gt;당시 선택한 방법은 1번이었다.&lt;br /&gt;
-알람을 끄지 않은 유저에 대해서 선별은 데이터베이스에 해당 유저의 알람 onoff 여부를 조회하여 확인하였다.&lt;br /&gt;
-그리고 푸시는 multicast 방법을 사용하면, 동시에 최대 1000개 토큰에 대해서 동시에 보낼 수 있어서, 해당 방법을 사용하였다.&lt;br /&gt;
-해당 방법을 사용함으로써, 알람정보를 가지고 있는 DB에 대해 의존성이 생겼지만, 그부분은 어쩔 수 없는 부분이라 생각된다.&lt;/p&gt;
+<p>당시 선택한 방법은 1번이었다.<br />
+알람을 끄지 않은 유저에 대해서 선별은 데이터베이스에 해당 유저의 알람 onoff 여부를 조회하여 확인하였다.<br />
+그리고 푸시는 multicast 방법을 사용하면, 동시에 최대 1000개 토큰에 대해서 동시에 보낼 수 있어서, 해당 방법을 사용하였다.<br />
+해당 방법을 사용함으로써, 알람정보를 가지고 있는 DB에 대해 의존성이 생겼지만, 그부분은 어쩔 수 없는 부분이라 생각된다.</p>
 
-&lt;p&gt;만약, 2번째 방법을 사용한다고 했을 때, 구독할 수 있는 토픽의 개수가 최악의 경우, 절반 정도 밖에 안되게 된다. (FCM 최대 구독가능 개수가 약 2000개 였던것으로 기억한다.)&lt;br /&gt;
-따라서, 당시에 떠올렸었어도, 1번 방법으로 진행했을거라 생각한다.&lt;/p&gt;
+<p>만약, 2번째 방법을 사용한다고 했을 때, 구독할 수 있는 토픽의 개수가 최악의 경우, 절반 정도 밖에 안되게 된다. (FCM 최대 구독가능 개수가 약 2000개 였던것으로 기억한다.)<br />
+따라서, 당시에 떠올렸었어도, 1번 방법으로 진행했을거라 생각한다.</p>
 
-&lt;h1 id=&quot;3-topic은-구독중인데-해당-유저에게-fcm을-전송할-경우-데이터가-누락되는-문제&quot;&gt;3. Topic은 구독중인데, 해당 유저에게 FCM을 전송할 경우, 데이터가 누락되는 문제&lt;/h1&gt;
+<h1 id="3-topic은-구독중인데-해당-유저에게-fcm을-전송할-경우-데이터가-누락되는-문제">3. Topic은 구독중인데, 해당 유저에게 FCM을 전송할 경우, 데이터가 누락되는 문제</h1>
 
-&lt;p&gt;&lt;strong&gt;아직 해결하지 못한 문제입니다.&lt;/strong&gt;&lt;/p&gt;
+<p><strong>아직 해결하지 못한 문제입니다.</strong></p>
 
-&lt;p&gt;어느날, 특정 토픽에 대해 알람 및 데이터 푸시를 받지 못하는 현상이 발생하였다.&lt;br /&gt;
-혹시, 해당 토픽을 FCM단에서 구독해제 되었거나, FCM TOKEN이 만료되었을 수 있겠다는 가능성을 열어두고, 테스트를 진행하였다.&lt;br /&gt;
-첫번째로 해당 토큰이 만료되었는지, 혹시 정상적으로 작동하지 않는지에 대해 테스트하였다.&lt;br /&gt;
-데이터, 데이터/알람, 알람 순으로 해당 토큰으로 메세지를 전송해보았는데, 클라이언트에서 모두 정상적으로 수신에 성공하였다.&lt;br /&gt;
-그 뒤, 대상 토픽에 대해 정상적으로 구독하고 있는지 확인하였고, 해당 토픽은 정상적으로 구독이 되어있는 상태였다.&lt;br /&gt;
-이후, 다시 데이터, 데이터/알람, 알람 순으로 해당 토픽으로 메세지를 전송해봤는데, 클라이언트에서 정상적으로 수신하지 못하였다.&lt;br /&gt;
-일단, 당시 클라이언트는 AOS였고, AOS에서는 알람을 백그라운드에서 직접 생성을 한다.  알람이 생성되어야 할 동작이 이루어졌음에도 불구하고, 알람을 노출하지 않았고, 앱을 껏다 켰을 때 동기화 API에 의해 데이터를 가져오고 있었다.&lt;br /&gt;
-그리고 만약, FCM단에서 알람을 전송한다면, 그 어떤 처리도 없기 떄문에 알람이 고스란히 노출된다. 하지만, 알람은 도착하지를 않았다.&lt;br /&gt;
-따라서, 해당 토픽에 대해 다른 클라이언트를 구독하였고, 다시 테스트 해본 결과 다른 클라이언트는 정상적으로 데이터 및 알람을 모두 받는데, 해당 클라이언트만 여전히 못받고 있었다.&lt;br /&gt;
-따라서, 서버단에서 재구독 하였더니, 정상적으로 수신되기 시작하였다.&lt;/p&gt;
+<p>어느날, 특정 토픽에 대해 알람 및 데이터 푸시를 받지 못하는 현상이 발생하였다.<br />
+혹시, 해당 토픽을 FCM단에서 구독해제 되었거나, FCM TOKEN이 만료되었을 수 있겠다는 가능성을 열어두고, 테스트를 진행하였다.<br />
+첫번째로 해당 토큰이 만료되었는지, 혹시 정상적으로 작동하지 않는지에 대해 테스트하였다.<br />
+데이터, 데이터/알람, 알람 순으로 해당 토큰으로 메세지를 전송해보았는데, 클라이언트에서 모두 정상적으로 수신에 성공하였다.<br />
+그 뒤, 대상 토픽에 대해 정상적으로 구독하고 있는지 확인하였고, 해당 토픽은 정상적으로 구독이 되어있는 상태였다.<br />
+이후, 다시 데이터, 데이터/알람, 알람 순으로 해당 토픽으로 메세지를 전송해봤는데, 클라이언트에서 정상적으로 수신하지 못하였다.<br />
+일단, 당시 클라이언트는 AOS였고, AOS에서는 알람을 백그라운드에서 직접 생성을 한다.  알람이 생성되어야 할 동작이 이루어졌음에도 불구하고, 알람을 노출하지 않았고, 앱을 껏다 켰을 때 동기화 API에 의해 데이터를 가져오고 있었다.<br />
+그리고 만약, FCM단에서 알람을 전송한다면, 그 어떤 처리도 없기 떄문에 알람이 고스란히 노출된다. 하지만, 알람은 도착하지를 않았다.<br />
+따라서, 해당 토픽에 대해 다른 클라이언트를 구독하였고, 다시 테스트 해본 결과 다른 클라이언트는 정상적으로 데이터 및 알람을 모두 받는데, 해당 클라이언트만 여전히 못받고 있었다.<br />
+따라서, 서버단에서 재구독 하였더니, 정상적으로 수신되기 시작하였다.</p>
 
-&lt;p&gt;이후에, 데이터만 포함된 FCM 메세지를 받지 못하는 버그도 발생하였었다.&lt;br /&gt;
-해당 문제 또한 재구독으로 해결하였다.&lt;/p&gt;
+<p>이후에, 데이터만 포함된 FCM 메세지를 받지 못하는 버그도 발생하였었다.<br />
+해당 문제 또한 재구독으로 해결하였다.</p>
 
-&lt;p&gt;위 문제에 대해 고민을 해보았고, 해당 문제에 대한 해결법은 해당 토큰으로 직접 보내는 방법이라고 생각을 하고 있다. &lt;br /&gt;
-토픽에 대해서는 이유없이 데이터 수신이 되질 않으니, 해당 상황이 발생하였을 때 정상동작하였던 토큰을 통한 발송이 당장 떠오르는 방법이다.&lt;/p&gt;
+<p>위 문제에 대해 고민을 해보았고, 해당 문제에 대한 해결법은 해당 토큰으로 직접 보내는 방법이라고 생각을 하고 있다. <br />
+토픽에 대해서는 이유없이 데이터 수신이 되질 않으니, 해당 상황이 발생하였을 때 정상동작하였던 토큰을 통한 발송이 당장 떠오르는 방법이다.</p>
 
-&lt;h1 id=&quot;4-http--httpv1-api로-이전하지-않은-이유&quot;&gt;4. HTTP &amp;gt; HTTPv1 API로 이전하지 않은 이유&lt;/h1&gt;
-&lt;p&gt;해당 방법으로의 이전을 고민하던 당시에, 개발하던 서버에서는 AOS/IOS를 각각 따로 FCM PUSH를 하였다.&lt;br /&gt;
-즉, 개선된 버전에서는 1번만 보내도 될 것을 기존 버전에서는 2번보내고 있으므로, 해당 횟수를 줄일 수 있다면, 줄이는 것이 맞는 방법이라 생각하였다.&lt;br /&gt;
-따라서, HTTP API &amp;gt; HTTP v1 API 로 이전을 시도해보았다.&lt;/p&gt;
+<h1 id="4-http--httpv1-api로-이전하지-않은-이유">4. HTTP &gt; HTTPv1 API로 이전하지 않은 이유</h1>
+<p>해당 방법으로의 이전을 고민하던 당시에, 개발하던 서버에서는 AOS/IOS를 각각 따로 FCM PUSH를 하였다.<br />
+즉, 개선된 버전에서는 1번만 보내도 될 것을 기존 버전에서는 2번보내고 있으므로, 해당 횟수를 줄일 수 있다면, 줄이는 것이 맞는 방법이라 생각하였다.<br />
+따라서, HTTP API &gt; HTTP v1 API 로 이전을 시도해보았다.</p>
 
-&lt;p&gt;기존 버전의 경우, FCM ServerKey를 이용하여 고정된 키값을 Header에 넣어서 전송요청하는 방법을 사용하였는데, v1의 경우, Access Token을 발급하여, 메세지를 전송한다.&lt;br /&gt;
-그리고, IOS/AOS/WEB 등에 대해 한번에 푸시할 수 있도록 개선되었다.&lt;/p&gt;
+<p>기존 버전의 경우, FCM ServerKey를 이용하여 고정된 키값을 Header에 넣어서 전송요청하는 방법을 사용하였는데, v1의 경우, Access Token을 발급하여, 메세지를 전송한다.<br />
+그리고, IOS/AOS/WEB 등에 대해 한번에 푸시할 수 있도록 개선되었다.</p>
 
-&lt;p&gt;하지만, 복병은 의외의 곳에서 나타났다.&lt;br /&gt;
-AOS에서 데이터를 FCM 푸시를 수신하지 못하는 것이다.&lt;br /&gt;
-뭔가 이상함을 느끼고 여러가지 테스트를 진행해 보았고, FCM Data Push가 도착할 때마다 토스트 메세지를 띄워주도록 변경한 클라이언트를 AOS/IOS에 요청하여 받아 테스트해봤는데, AOS에서는 메세지가 도착하질 않았다.&lt;br /&gt;
-기존 버전으로 테스트 할 때는 잘 되던 것이 v1에서는 되질 않아서, 내가 잘못보냈나 하면서 바꿔가면서 테스트해봐도, 여전히 수신을 못하고 있었다. ( Firebase 서버에서 못보내는건지, Android에서 못받는건지 모르겠다. )&lt;/p&gt;
+<p>하지만, 복병은 의외의 곳에서 나타났다.<br />
+AOS에서 데이터를 FCM 푸시를 수신하지 못하는 것이다.<br />
+뭔가 이상함을 느끼고 여러가지 테스트를 진행해 보았고, FCM Data Push가 도착할 때마다 토스트 메세지를 띄워주도록 변경한 클라이언트를 AOS/IOS에 요청하여 받아 테스트해봤는데, AOS에서는 메세지가 도착하질 않았다.<br />
+기존 버전으로 테스트 할 때는 잘 되던 것이 v1에서는 되질 않아서, 내가 잘못보냈나 하면서 바꿔가면서 테스트해봐도, 여전히 수신을 못하고 있었다. ( Firebase 서버에서 못보내는건지, Android에서 못받는건지 모르겠다. )</p>
 
-&lt;p&gt;위의 이유 때문에 이전은 하지 않게 되었다.&lt;br /&gt;
-만약, 됐었어도 HTTP &amp;gt; HTTPv1 으로 변경하지 않은 추가적인 이유는 아래와 같다.&lt;br /&gt;
+<p>위의 이유 때문에 이전은 하지 않게 되었다.<br />
+만약, 됐었어도 HTTP &gt; HTTPv1 으로 변경하지 않은 추가적인 이유는 아래와 같다.<br />
 multicast 방법을 지원하지 않는다.
-만약, Google에서 인증 서버에 문제가 생겨서 AccessToken을 재발급받지 못하면, 장애가 난 시간만큼 클라이언트에 푸시가 전송되지 않게 된다.&lt;/p&gt;
-
-&lt;h1 id=&quot;5-http-api에서-aosios-푸시는-함께--따로-&quot;&gt;5. HTTP API에서 AOS/IOS 푸시는 함께 ? 따로 ?&lt;/h1&gt;
-&lt;p&gt;과거에는 서비스의 서버에서 AOS/IOS에 대해 푸시를 따로 전송하였다.&lt;br /&gt;
-그렇게 전송하는 이유는 이미 서비스 서버를 본격적으로 개발하기 시작했을 때는 이미 그런 상황이라 잘 모른다.&lt;br /&gt;
-하지만, 위 4번에 해당하는 작업을 못하게 되면서, 그냥 IOS/AOS에 대해 같은데이터를 넣고 한번에 푸시를 보내니, 둘 모두 데이터를 정상적으로 수신하였다.&lt;br /&gt;
-물론, 각각(AOS/IOS)의 동일한 키값에 대해 서로 다르게 받고 있는 데이터를 사용하고 있다면, 따로 전송하는 것이 맞겠지만, 개발하던 서비스에서는 그렇지 않기 때문에, 문제가 없다 판단되었다.&lt;br /&gt;
-만약, 동일한 키값에 대해 서로 다르게 받아야 한다고 하면, 그때가서 개선하면 될 문제라고 생각한다.&lt;/p&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="Develop" /><category term="FCM" /><summary type="html">FCM을 사용하면서 겪은 문제와 문제를 해결했던 방법.</summary></entry><entry><title type="html">Redis 장애</title><link href="https://jihwankim.github.io/moigo/Redis-%EC%9E%A5%EC%95%A0/" rel="alternate" type="text/html" title="Redis 장애" /><published>2021-04-18T00:00:00+09:00</published><updated>2021-04-17T22:06:00+09:00</updated><id>https://jihwankim.github.io/moigo/Redis-%EC%9E%A5%EC%95%A0</id><content type="html" xml:base="https://jihwankim.github.io/moigo/Redis-%EC%9E%A5%EC%95%A0/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;Redis 장애 대응&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;14일 오후 2시 36분 ~ 38분 사이에 서버에 장애가 발생했다.&lt;br /&gt;
-장애 포인트는 AWS Elasticache Redis였고, 36분부터 문제가 생겨 38분에 복구되었다.&lt;br /&gt;
-장애가 발생한 이유는 무엇이고, 어떻게 개선할 것인지에 대해 생각했던 것을 기록하는 글이다.&lt;/p&gt;
-
-&lt;h1 id=&quot;장애가-2분이나-유지된-이유&quot;&gt;장애가 2분이나 유지된 이유&lt;/h1&gt;
-&lt;p&gt;Redis 서비스에서 Primary 1대 Replica 1대를 사용하고 있는데, FailOver 설정을 해두지 않아서, Replica가 자동으로 Primary로 승격되지 않아 장애가 유지되었다. 즉, 장애 복구시간동안, Redis에 대한 요청이 모두 실패하여, 엮여있는 부분에서 장애가 발생하였다.&lt;/p&gt;
-
-&lt;h1 id=&quot;장애-발생에-따라-문제가-된-부분&quot;&gt;장애 발생에 따라 문제가 된 부분&lt;/h1&gt;
-&lt;p&gt;서버에서 세션정보를 저장하는 DB로 Redis를 사용하고 있는데, 유저가 API를 요청하면, 해당 세션이 유효한지 여부를 검증할 수 없는 문제가 발생하였다.&lt;/p&gt;
-
-&lt;h1 id=&quot;추후-장애-발생을-방지하기-위해-어떻게-개선할-것인가&quot;&gt;추후, 장애 발생을 방지하기 위해 어떻게 개선할 것인가&lt;/h1&gt;
-&lt;ol&gt;
-  &lt;li&gt;Redis FailOver: true 설정 ( 기존에는 false로 설정되어있었음. )&lt;/li&gt;
-  &lt;li&gt;Redis Version 5.0.4 -&amp;gt; 5.0.6 으로 업그레이드&lt;/li&gt;
-  &lt;li&gt;MultiAZ 설정 ( 기존에는 false로 설정되어 있었음. )&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h1 id=&quot;추가적인-개선&quot;&gt;추가적인 개선&lt;/h1&gt;
-&lt;ol&gt;
-  &lt;li&gt;Redis의 Read Replica에 대해서 요청하지 않고 있는데, 읽을 때, Read Replica의 EndPoint로 요청하도록 개선&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h1 id=&quot;개선-근거&quot;&gt;개선 근거&lt;/h1&gt;
-&lt;h2 id=&quot;redis-failover-true-설정&quot;&gt;Redis FailOver true 설정&lt;/h2&gt;
-&lt;p&gt;해당 설정이 되어 있었으면, replica가 자동으로 primary로 승격되어 장애 시간이 2분이나 되지 않았을 것이다. 하지만, false로 되어 있었기 때문에, primary가 복구될 때 까지 계속 장애가 유지되었다.&lt;/p&gt;
-
-&lt;h2 id=&quot;redis-version-504---506-으로-업그레이드&quot;&gt;Redis Version 5.0.4 -&amp;gt; 5.0.6 으로 업그레이드&lt;/h2&gt;
-&lt;p&gt;아래의 문서를 근거로 버전을 업그레이드 할 예정이다.&lt;br /&gt;
-만약, 문제가 생겨서 Replica가 Primary로 승격된다고 할 때, 읽기 쓰기 모두 장애는 발생하지 않는 방법이 있다면 해당 방법을 사용하는 것이 맞다 생각한다.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;AWS 문서 발취&lt;/strong&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;ElastiCache for Redis 클러스터의 경우, 클러스터에서 들어오는 쓰기 요청을 처리하는 중에 계획된 노드 교체가 완료됩니다.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;다중 AZ가 활성화되어 5.0.5 이상 엔진에서 실행 중인 Redis 클러스터 모드 비활성화 클러스터의 경우, 클러스터에서 들어오는 쓰기 요청을 처리하는 중에 계획된 노드 교체가 완료됩니다.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;다중 AZ가 활성화되어 5.0.4 이하 엔진에서 실행 중인 Redis Cluster 모드 비활성화 클러스터의 경우, DNS 업데이트와 관련하여 짧은 쓰기 중단이 발생할 수 있습니다. 이 중단은 최대 몇 초가 걸릴 수 있습니다. 이 프로세스는 다중 AZ를 활성화하지 않은 경우 발생하는 새 기본 노드를 다시 생성하고 프로비저닝하는 것보다 훨씬 빠릅니다.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;이후, 업데이트 내역을 살펴보니, 바로 올려도 문제는 없을것 같긴 한데, 테스트정도는 해보는게 맞다고 생각한다.&lt;br /&gt;
-따라서, 개발서버용 Redis를 미리 5.0.6 으로 올려서 테스트 해보고 업데이트할 예정이다.&lt;/p&gt;
-
-&lt;h2 id=&quot;multiaz-설정&quot;&gt;MultiAZ 설정&lt;/h2&gt;
-&lt;p&gt;만약, 특정 리전에서 장애가 발생할 경우, 해당 리전에 primary와 replica가 함께 떠있다면, 그것은 곧 장애로 이어진다.&lt;br /&gt;
-설정을 true로 변경하게 되면, 두개 이상의 리전에서 동시에 문제가 발생하지 않는다면, 서비스는 문제없이 유지될 것이다.&lt;/p&gt;
-
-&lt;h2 id=&quot;redis-read-replica-end-point-사용&quot;&gt;Redis Read Replica End Point 사용&lt;/h2&gt;
-&lt;p&gt;해당 부분은 기존에 사용하고 있지 않아서, 사용하려고 한다.&lt;br /&gt;
-코드 상에서 Read라면, Read EndPoint로 요청할 것이고, Write라면, Primary EndPoint에 요청하게끔 개선할 예정이다.&lt;/p&gt;
-
-&lt;h3 id=&quot;참고링크&quot;&gt;참고링크&lt;/h3&gt;
-&lt;p&gt;&lt;a href=&quot;https://docs.aws.amazon.com/ko_kr/AmazonElastiCache/latest/red-ug/AutoFailover.html#auto-failover-test&quot;&gt;AWS - FailOver&lt;/a&gt;&lt;br /&gt;
-&lt;a href=&quot;https://docs.aws.amazon.com/ko_kr/AmazonElastiCache/latest/red-ug/Endpoints.html&quot;&gt;AWS - EndPoints&lt;/a&gt;&lt;br /&gt;
-&lt;a href=&quot;https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/BestPractices.html&quot;&gt;AWS - BestPractice&lt;/a&gt;&lt;/p&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="MoiGo" /><category term="MoiGo, Erlang, AWS, Redis" /><summary type="html">Redis 장애 대응</summary></entry><entry><title type="html">Auth와 User 분리</title><link href="https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/" rel="alternate" type="text/html" title="Auth와 User 분리" /><published>2021-04-15T00:00:00+09:00</published><updated>2021-04-10T22:06:00+09:00</updated><id>https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC</id><content type="html" xml:base="https://jihwankim.github.io/thinking/Auth%EC%99%80-User-%EB%B6%84%EB%A6%AC/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;하나의 유저 계정에 여러 로그인 방법 추가 설계 고민&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;요즘은 OAuth2를 이용하여 회원가입/로그인하는 서비스들이 매우 많아졌다.&lt;br /&gt;
-해당 방법으로 로그인을 하다 보면, 동일한 계정에 대해 구글계정으로 로그인 등 여러가지 추가 로그인 방법이 있으면 좋겠다고 생각이 들 때가 있고, 기존에 사용하던 연동된 계정을 사용하지 않게 되는 경우도 발생한다.&lt;br /&gt;
-따라서, 하나의 유저 계정에 여러개의 인증 방법으로 로그인 할 수 있는 방법에 대해 고민해보았고, 어떻게 해야할 지에 대해 기록한다.&lt;/p&gt;
-
-&lt;p&gt;내가 지금까지 만들었던 DB의 대부분은 유저정보가 곧 로그인 정보와 동일하였다.&lt;br /&gt;
-만약, 로그인을 이메일(아이디)/비밀번호로 사용하다가 OAuth2와 같은 로그인 방법이 추가되면, 테이블 구조와 코드가 더러워졌었다.&lt;br /&gt;
-하지만, 해당 방법 말고 유저 테이블과 로그인에 필요한 인증 테이블을 다르게 가지고 간다면, 해당 문제가 발생하지 않겠다라고 생각이 들었다.&lt;/p&gt;
-
-&lt;p&gt;해당 방법은 이전에 회사에서 퇴사하신 분과 토이프로젝트 작업을 할 때, 고민하다가 적용하였었다.&lt;br /&gt;
-테이블 구조는 아래와 같이 가진다.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;../../../assets/image/auth_user_seperate/table_structure.png&quot; alt=&quot;table_structure&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;위 이미지는 대략적으로 이런식으로 구현할 거라는 것만 그렸다.&lt;br /&gt;
-만약, 제공자가 구글인 인증방법이 추가된다면, 테이블을 하나 추가 시키면 된다.&lt;br /&gt;
-그리고 로그인 시, 입력되는 type에 따라, 인증방법을 달리하면 된다.&lt;/p&gt;
-
-&lt;p&gt;만약, 회원가입/로그인/인증코드 추가 Erlang 코드상에서 나타낸다면, 아래와 같은 코드가 나올 것이다.&lt;br /&gt;
-단, 예제를 위해 작성 하였고, 에러에 대한 대비 코드는 추가하지 않았다. 실제 코드를 실행해보지 않았다.&lt;br /&gt;
-실제로 작업한다면, 함수합성을 사용할 것이다.&lt;/p&gt;
-&lt;h3 id=&quot;autherl&quot;&gt;auth.erl&lt;/h3&gt;
-&lt;pre&gt;&lt;code class=&quot;language-Erlang&quot;&gt;  ...
-  -export_all().
-
-  -spec sign_up(bitstring(), types:auth_type(), map()) -&amp;gt; 
-    {ok, map()} 
-    | {error, already_exist_auth_for_email}
-    | {error, already_use_email}.
-  sign_up(Name, Type, AuthData)-&amp;gt;
-    {ok, UserInfo} = model_user:insert(Name),
-    {ok, AuthModule} = auth_plugin_utils:type_to_auth_module(Type),
-
-    {ok, _} = AuthModule:new(UserInfo, AuthData),
-    {ok, UserInfo}.
-
-  -spec sign_in(types:auth_type(), map())-&amp;gt;
-    {ok, map()}
-    | {erorr, invalid_auth_info}.
-  sign_in(Type, AuthData)-&amp;gt;
-    {ok, AuthModule} = auth_plugin_utils:type_to_auth_module(Type),
-    case
-      AuthModule:get(Type, AuthData)
-    of
-      {ok, UserIdx}-&amp;gt;
-        {ok, UserInfo} = model_user:get_by_user_idx(UserIdx),
-        {ok, UserInfo};
-      {error, _} = Err-&amp;gt;
-        Err
-    end.
-  
-  -spec add_auth(pos_integer(), types:auth_type(), map())-&amp;gt;
-    ok
-    | {error, already_exist_auth_for_email}
-    | {error, already_use_email}.
-  add_auth(UserIdx, Type, AuthData)-&amp;gt;
-    {ok, UserInfo} = model_user:get_by_user_idx(UesrIdx),
-    {ok, AuthModule} = auth_plugin_utils:type_to_auth_module(Type),
-
-    case
-      AuthModule:new(UserInfo, AuthData)
-    of
-      {ok, _} -&amp;gt;
-        ok;
-      {error, _} = Err-&amp;gt;
-        Err
-    end.
-
-    -spec withdraw(pos_integer()) -&amp;gt; ok.
-    withdraw(UserIdx)-&amp;gt;
-      {ok, UserInfo} = model_user:get_by_user_idx(UesrIdx),
-        [
-          AuthModule:remove(UserInfo)
-          || AuthModule &amp;lt;- auth_plugin:get_all_auth_modules()],
-      model_user:delete_by_user_idx(UserIdx),
-      ok.
-
-  %%%
-  %%% Internal Function
-  %%%
-
-  ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;auth_plugin_for_emailerl&quot;&gt;auth_plugin_for_email.erl&lt;/h3&gt;
-&lt;pre&gt;&lt;code class=&quot;language-Erlang&quot;&gt;
-  -behavior(auth_plugin).
-  -export_all().
-  
-  -spec new(UserInfo :: map(), AuthData :: map()) -&amp;gt; 
-    {ok, map()}
-    | {error, already_exist_auth_for_email}
-    | {error, already_use_email}.
-  new(#{uesr_idx := UesrIdx} = UserInfo, #{email := Email, password := Password} = _AuthData)-&amp;gt;
-    IsAlreadyHasAuth = 
-      case
-        model_auth_for_email:get_by_user_idx(UserIdx)
-      of
-        {ok, _}-&amp;gt;
-          true;
-        {error, _}-&amp;gt;
-          false
-      end,
-    
-    IsAlreadyUseEmail = 
-      case
-        model_auth_for_email:get_by_email(Email)
-      of
-        {ok, _}-&amp;gt;
-          true;
-        {error, _}-&amp;gt;
-          false
-      end,
-      
-    case
-      {
-        IsAlreadyHasAuth
-        , IsAlreadyUseEmail
-      }
-    of
-      {true, _} -&amp;gt;
-        {error, already_exist_auth_for_email};
-      {_, true} -&amp;gt;
-        {error, already_use_email};
-      {false, false} -&amp;gt;
-        % 패스워드 암호화 과정 코드가 포함되어야 하지만, 여기에는 포함하지 않음.
-        model_auth_for_email:insert(UserIdx, Email, Password)
-    end.
-
-  -spec get(AuthData :: map()) -&amp;gt; 
-    {ok, pos_integer()}
-    | {error, invalid_auth_info}.
-  get(#{email := Email, password := Password} = _AuthData) -&amp;gt;
-    case
-      model_auth_for_email:get_by_email(Email)
-    of
-      {ok, AuthInfo} -&amp;gt;
-        case
-          maps:get(password, AuthInfo)
-        of
-          Password -&amp;gt; 
-            {ok, maps:get(user_idx, AuthInfo)};
-          _ -&amp;gt;
-            {error, invalid_auth_info}
-        end;
-      {error, _} -&amp;gt;
-        {error, invalid_auth_info}
-    end.
-
-  -spec remove(UserInfo :: map()) -&amp;gt; 
-    {ok, any()}.
-  remove(#{user_idx := UserIdx} = _UserInfo) -&amp;gt;
-    model_auth_for_email:remove_by_user_idx(UserIdx).
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;auth_plugin_utilserl&quot;&gt;auth_plugin_utils.erl&lt;/h3&gt;
-&lt;pre&gt;&lt;code class=&quot;language-Erlang&quot;&gt;  -export_all().
-
-  type_to_auth_module(email)-&amp;gt;
-    {ok, auth_plugin:auth_plugin_for_email()};
-  type_to_auth_module(Any)-&amp;gt;
-    io:format(&quot;{[ [~p:~p] invalid auth module! ~p ]} ~n&quot;, [?MODULE, ?FUNCTION_NAME, Any]),
-    {error, invalid_auth_module}.
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;auth_pluginerl&quot;&gt;auth_plugin.erl&lt;/h3&gt;
-&lt;pre&gt;&lt;code class=&quot;language-Erlang&quot;&gt;  -export_all().
-
-  auth_plugin_for_email()-&amp;gt;
-    ?FUNCTION_NAME().
-
-  get_all_auth_modules()-&amp;gt;
-    [FunctionName || {FunctioName, _Arity}&amp;lt;- module_info(exports), FunctionName =/= module_info, FunctionName =/= get_all_auth_modules].
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;behavior는 Java로 치면 Interface같은 역할을 하는데, Erlang에서는 강제성을 띄지 않는다.&lt;br /&gt;
-위와 같은 방식을 사용하면, 새로운 로그인/회원가입 방법이 추가되면 아래 순서대로 진행하면 된다.&lt;/p&gt;
-&lt;ol&gt;
-  &lt;li&gt;로그인/회원가입 방법에 맞는 테이블 추가&lt;/li&gt;
-  &lt;li&gt;로그인/회원가입 방법에 맞는 plugin 파일을 추가 ( ex : auth_plugin_for_kakao)&lt;/li&gt;
-  &lt;li&gt;auth_plugin.erl 파일로 가서 해당 모듈명에 해당하는 함수를 추가시킨다.&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auth_plugin_utils.erl&lt;/code&gt;파일에서 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fun type_to_auth_module/1&lt;/code&gt;에 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kakao&lt;/code&gt;에 해당되는 패턴매칭을 추가시켜준다.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;만약, 특정 방법으로 추가적인 회원가입/로그인을 막게 되면, 해당 plugin 내부에서 new/get function의 return으로 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;{error, not_suppert}&lt;/code&gt; 정도만 주면 될것이라 생각된다.&lt;/p&gt;
-
-&lt;p&gt;실제, 해당 방법이 적용된 프로젝트는 서버는 TypeScript + Express + TypeORM를 사용하였고, 클라이언트는 Flutter를 통해 작성하였다.&lt;br /&gt;
-개인적으로 재밌었는데, 서로 바빠지게 되면서, 추가적인 하지 못하게 되어 안타까운 토이 프로젝트였다.&lt;br /&gt;
-해당 코드는 추후, 개인 Github를 통해서 올릴 예정이다.&lt;/p&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="Thinking" /><summary type="html">하나의 유저 계정에 여러 로그인 방법 추가 설계 고민</summary></entry><entry><title type="html">Twinny Helper 앱 제작기</title><link href="https://jihwankim.github.io/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0/" rel="alternate" type="text/html" title="Twinny Helper 앱 제작기" /><published>2021-04-10T00:00:00+09:00</published><updated>2021-04-10T22:06:00+09:00</updated><id>https://jihwankim.github.io/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0</id><content type="html" xml:base="https://jihwankim.github.io/flutter/Twinny-Helper-%ED%9B%84%EA%B8%B0/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;사내 비즈박스 도입에 따른, TwinnyHelper 앱 제작기&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;총 개발 소요시간 : 약 20시간&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;올해 초, 사내 그룹웨어가 도입되었다.&lt;br /&gt;
-도입된 그룹웨어는 비즈박스고, 해당 그룹웨어를 통해서 출퇴근기록, 휴가신청, 회의실예약 등이 가능하다.&lt;/p&gt;
-
-&lt;p&gt;이전에, slack을 이용해서, 출근 기록을 기록하고, 해당 기록을 기반으로 회사 식대를 계산하는 Bot을 만들어서 사용했었는데, 해당 비즈박스의 API들을 사용하여, Bot의 기능을 대체할 수 있겠다고 생각했다.&lt;br /&gt;
-해당 그룹웨어에서 자체 제작된 앱이 있으나, 출퇴근기록조회, 휴가신청같은 기능이 앱에서 동작하지 않아서 따로 제작하기로 마음먹었다.&lt;/p&gt;
-
-&lt;p&gt;앱 제작에 사용된 프레임워크는 구글에서 만든 Flutter이다.&lt;br /&gt;
-처음 접했을 때는 1.0이 막 런칭되었을 떄부터 조금씩 건드려보고 있는데, UI만드는 부분이 너무 직관적이고, 레고를 조립한다는 느낌을 받았어서 개인적으로 앱 만들기가 편하다고 생각하는 프레임워크다.&lt;/p&gt;
-
-&lt;p&gt;상태관리는 Provider를 사용했다.&lt;br /&gt;
-해당 라이브러리는 이전에 여러가지 앱을 만들때부터 사용해봤는데, 사용방법 자체도 간단하고 복잡하지 않아 개인적으로 만족스럽게 사용중이다.&lt;br /&gt;
-저장소는 SharedPreference를 사용했고, 유저의 계정 id/password 를 암호화해서 저장하였다.&lt;/p&gt;
-
-&lt;p&gt;일단 비즈박스에 공개된 API 문서부터 찾아보았는데, 해당 문서를 찾지 못했다.&lt;br /&gt;
-따라서, 크롬 개발자 도구를 이용해서, 네트워크 통신 내용을 보며, API 정보를 하나 하나 찾아갔다.&lt;/p&gt;
-
-&lt;hr /&gt;
-&lt;h1 id=&quot;로그인&quot;&gt;로그인&lt;/h1&gt;
-&lt;p&gt;비즈박스 그룹웨어에서는 클라이언트(웹) 측에서 계정아이디와 비밀번호를 암호화해서 보낸다.&lt;br /&gt;
-해당 부분에 대해서 앱 내에서도 따라 구현하였다.&lt;/p&gt;
-
-&lt;p&gt;로그인시, 쿠키발급을 위한 API와, 실제 추가적인 몇가지 권한을 부여하는 API가 따로 존재했다.&lt;br /&gt;
-즉, 로그인 API 요청 -&amp;gt; 쿠키발급 -&amp;gt; 권한부여 서버(Spring)로 Redirect -&amp;gt; 메인 페이지 이동 순서로 로그인이 진행되었다.&lt;br /&gt;
-만약, 쿠키는 발급받았는데, Spring 서버로 Redirect시키지 않으면 일부 기능이 정상동작하지 않는다.&lt;br /&gt;
-(그중, 경험했던 정상동작하지 않는 부분은 자원예약에서 참여자를 지정할 수 있는데, 해당 목록을 불러오지 못하는 부분이 있었다.)&lt;/p&gt;
-
-&lt;h1 id=&quot;근무기록&quot;&gt;근무기록&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;해당 기능은 비즈박스 어플리케이션에서 조회할 수 없음&lt;/strong&gt;&lt;br /&gt;
-근무기록을 가져오는 작업은 금방 끝났다. 데이터와 요청 자체가 간단했기 때문이다.&lt;br /&gt;
-하지만, 휴가를 쓰게 되면, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;휴가&lt;/code&gt; + &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;출근여부 정상&lt;/code&gt; 두개가 동일한 날에 존재하는 경우가 있다는 것을 추후 유지보수 단계에서 알게 된 부분이 있었는데, 해당 부분은 여유될때 추가적으로 개선해야될 부분이다.&lt;/p&gt;
-
-&lt;h1 id=&quot;식대계산&quot;&gt;식대계산&lt;/h1&gt;
-&lt;p&gt;식대는 사내 규칙으로만 존재하며, 비즈박스 앱에서는 제공하지 않는 기능이다.&lt;br /&gt;
-식대는 근무기록을 기반으로, 당일 출근하면 7000원. 근무시간이 11시간을 넘어가면 14000원이 되는 방식이다.&lt;br /&gt;
-앱 내에서는 계산을 하고 당월 첫째날부터 당일까지 사용 가능한 총 식대를 계산하여 보여준다.&lt;/p&gt;
-
-&lt;h1 id=&quot;휴가-기안&quot;&gt;휴가 기안&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;해당 기능은 비즈박스 어플리케이션에서 사용할 수 없음&lt;/strong&gt;&lt;br /&gt;
-휴가 기안에 대한 기능을 앱에 구현할 때 생각보다 시간이 오래 걸렸던 걸로 기억한다.&lt;br /&gt;
-그 이유는 여러개의 휴가 목록. 휴가 공유 캘린더 따로 존재. 휴가 기안시 페이지로 넘어갈 때, 휴가 목록에 대한 HTML로 전달하는 부분, 휴가 선택시, 공휴일 혹은 주말여부 자동 제외 등이 있었다.
-그리고 휴가를 쓸 때, 결제자를 설정하는데, 해당 설정란을 가져와서 순서를 어떻게 하느냐도 문제였었다.&lt;br /&gt;
-어떻게 꾸역꾸역 작업해서 결국 앱 내에 휴가 기안 기능은 포함되었고, 개인적으로 웹에 접속해서 신청하는 것보다 훨씬 편하다고 생각한다.&lt;/p&gt;
-
-&lt;h1 id=&quot;자원-달력&quot;&gt;자원 달력&lt;/h1&gt;
-&lt;p&gt;자원 달력은 비즈박스 앱에도 존재하는 기능인데, 회의실/장비같은 자원을 예약하고, 예약 목록을 조회할 수 있는 기능이다.&lt;br /&gt;
-해당 부분에 대해서는 비즈박스 앱과 거의 동일하게 옮겨왔는데, 자원에 따라서 따로 당일 예약 여부를 볼 수 있다는 차이점이 존재한다.&lt;/p&gt;
-
-&lt;h1 id=&quot;업데이트-이력-관리-및-배포&quot;&gt;업데이트 이력 관리 및 배포&lt;/h1&gt;
-&lt;p&gt;업데이트 이력 관리는 github에 올려둔 파일을 조회하여 이력을 관리하도록 하였다.&lt;br /&gt;
-해당 파일에는 버전/업데이트 로그가 존재한다.&lt;br /&gt;
-그리고 배포는 사내 앱배포 어플리케이션인 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;트위니 앱센터&lt;/code&gt;와 회사 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Confluence&lt;/code&gt;를 이용하여 배포하였다.&lt;/p&gt;
-
-&lt;h1 id=&quot;디자인&quot;&gt;디자인&lt;/h1&gt;
-&lt;p&gt;앱 디자인은 처음에는 무척 투박했으나, 친하게 지내는 회사 디자이너분께서 근무기록+식대계산을 하는 화면에 대해서만 어느정도 디자인을 해주셨다.&lt;br /&gt;
-디자인 당시, 나는 근무기록 + 식대계산을 한 화면에 넣고 싶어했고, 디자이너분꼐서는 두개의 성격이 달라서, 같은 페이지에 있으면 문제가 될 수 있다고 이야기 해주셨었는데, 이야기 끝에 타협하여 지금의 형태가 되었다. ( 솔직히 거의 밀어붙이기만 했었다… )&lt;/p&gt;
-
-&lt;p&gt;실제로, 4월의 경우, 시작이 되는 1일이 월요일이 아니어서 금주의 출근기록을 조회 + 평균근무시간을 보여주는 디자인과 식대를 계산한 디자인이 매치되지 않는 부분이 있다고 느꼈었다.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;열심히 만들었고, AOS/IOS/DESKTOP으로 Deploy하여 배포해보았는데, 개인적으로 재밌었고, 사람들이 잘쓰고있다고 너무 좋다고 이야기해주는 것을 보니, 보람찼다.&lt;br /&gt;
-그리고 처음으로 디자이너가 준 디자인을 보고 맞춰가면서 작업해봤는데, 어려울거라고는 생각했지만, 생각보다 더 어려웠었다. 하지만, 처음 해보니, 재미도 있었다.&lt;br /&gt;
-앱을 만들면서 나는 정리가 잘 안된다를 다시 한 번 느꼈고, 아직도 많이 부족하구나를 다시 한번 느꼈다. 더 정진해야겠다.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;디자인 도움을 주신 디자이너분께 다시한번 감사합니다&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;앱은 추후, 코드를 조금 더 정리한 뒤에 개인 git에 공개할 예정이다.&lt;/strong&gt;&lt;br /&gt;
-&lt;strong&gt;(휴가 기안시, 대상이되는 캘린더를 임의로 변경할 수 있게 수정하고, 타회사와 맞지 않는 식대계산 부분은 제외할 예정)&lt;/strong&gt;&lt;/p&gt;
-
-&lt;hr /&gt;
-&lt;h1 id=&quot;인앱-사진&quot;&gt;인앱 사진&lt;/h1&gt;
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;아래에서 자원 예약시, 참여자는 캡처 당시 모바일 환경에서 보이질 않아서 제외함.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;출퇴근기록 / 식대 / 주평균출근시간
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-1.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;휴가신청 목록
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-2.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;휴가신청 화면
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-3.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;결제라인 설정(조회)
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-4.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;휴가신청 화면 (결제라인 설정이후)
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-5.png&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;휴가 선택 화면
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-6.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;휴가 종류 목록
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-7.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;휴가 선택 화면 ( 종류선택 + 날짜지정 이후 )
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-8.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;휴가 신청화면 ( 상신라인 설정 및 휴가 목록 선택 이후 )
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-9.png&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;자원 달력
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-10.png&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;자원 달력 예약 디테일
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-11.png&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;자원 달력 자원 종류 필터링
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-12.png&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;자원 예약
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-13.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;자원 예약 ( 자원 목록 )
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-14.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;설정
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-15.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;버전정보 및 업데이트 로그
-&lt;img src=&quot;../../../assets/image/twinny_helper/KakaoTalk_Photo_2021-04-10-07-00-16-16.jpeg&quot; alt=&quot;메인&quot; /&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="Flutter" /><category term="Flutter" /><summary type="html">사내 비즈박스 도입에 따른, TwinnyHelper 앱 제작기</summary></entry><entry><title type="html">푸시 스로틀링</title><link href="https://jihwankim.github.io/moigo/%ED%91%B8%EC%8B%9C-%EC%8A%A4%EB%A1%9C%ED%8B%80%EB%A7%81/" rel="alternate" type="text/html" title="푸시 스로틀링" /><published>2021-04-09T00:00:00+09:00</published><updated>2021-04-09T22:06:00+09:00</updated><id>https://jihwankim.github.io/moigo/%ED%91%B8%EC%8B%9C-%EC%8A%A4%EB%A1%9C%ED%8B%80%EB%A7%81</id><content type="html" xml:base="https://jihwankim.github.io/moigo/%ED%91%B8%EC%8B%9C-%EC%8A%A4%EB%A1%9C%ED%8B%80%EB%A7%81/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;모이고 푸시 스로틀링을 통한 TOPIC_RATE_EXCEEDED 에러 방지&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://firebase.google.com/docs/cloud-messaging/concept-options#device_throttling&quot;&gt;단일 기기에 대한 최대 메시지 속도&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://firebase.google.com/docs/cloud-messaging/send-message?hl=ko#admin&quot;&gt;FCM 에러 목록&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;모이고 기능 개발도중 FCM에 TOPIC RATE EXCEEDED 에러가 발생했다.&lt;/p&gt;
-
-&lt;p&gt;해당 에러의 발생 사유는 아래와 같다.&lt;br /&gt;
-&lt;strong&gt;특정 주제의 구독자에게 전달되는 메시지 비율이 너무 높습니다. 이 주제로 보내는 메시지 수를 줄이세요. 바로 다시 보내도록 시도해서는 안 됩니다&lt;/strong&gt;&lt;/p&gt;
-
-&lt;hr /&gt;
-&lt;p&gt;일단, 단일 기기에 대한 최대 메세지 속도 제한을 보고 접근했다.&lt;/p&gt;
-
-&lt;p&gt;문서 상에서 FCM의 클라이언트 수신 가능한 최대 개수가 분당 240개. 시간당 5000개까지 제한하고 있다.&lt;br /&gt;
-분당 240개를 잡고 계산했을 때, 0.25초당 1개의 푸시만 클라이언트에 전송되어야 한다.&lt;br /&gt;
-물론, 최대로 잡았을 떄 저렇다는 거지, 실제로는 더 적게 보내야 한다.&lt;/p&gt;
-
-&lt;p&gt;당장 보내는 메세지의 수를 많이 줄이는 것은 어렵다고 판단했다.&lt;br /&gt;
-따라서, 최근에 해당 부분에 대해서 작업하여, 0.25초마다 한번씩만 푸시를 하도록 하였다.&lt;br /&gt;
-여러개의 푸시가 한번에 몰려도 토픽당 1초에 최대 4번까지만 전송한다는 이야기다.&lt;br /&gt;
-코드 상에서는 각 토픽마다 gen_server를 global로 띄운후에, 요청 function 을 호출하면, 띄워진 토픽에 해당하는 gen_server로 푸시요청이 넘겨지고, 매 0.25초 마다 한번씩 해당 푸시를 전송하도록 하였다.&lt;/p&gt;
-
-&lt;p&gt;이후, 해당에러는 발생하지 않게 되었다.&lt;/p&gt;
-
-&lt;p&gt;채팅을 제공하고, 여러가지 동작에 대해서 클라이언트간 싱크를 지원하기 위해 각 동작마다 FCM을 전송하고 있기 때문에, 위 방법은 임시조치일 뿐, 해결방법이 되지는 못한다.&lt;br /&gt;
-따라서, 지금 생각해본 해결방법은 포그라운드일 경우, WebSocket을 통해 데이터를 받고, 백그라운드일 경우, FCM Notification만 클라이언트에 전송하는 방법이다.&lt;br /&gt;
-해당 부분에 대해 개선을 하게 되면, 추후 포스팅을 통해, 문제가 되었던 점과 어떤것을 고민했는지 남길 예정이다.&lt;/p&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="MoiGo" /><summary type="html">모이고 푸시 스로틀링을 통한 TOPIC_RATE_EXCEEDED 에러 방지</summary></entry><entry><title type="html">푸시 시스템 개선</title><link href="https://jihwankim.github.io/moigo/%EB%AA%A8%EC%9D%B4%EA%B3%A0-%ED%91%B8%EC%8B%9C-%EA%B0%9C%EC%84%A0/" rel="alternate" type="text/html" title="푸시 시스템 개선" /><published>2021-04-06T00:00:00+09:00</published><updated>2021-04-06T22:06:00+09:00</updated><id>https://jihwankim.github.io/moigo/%EB%AA%A8%EC%9D%B4%EA%B3%A0-%ED%91%B8%EC%8B%9C-%EA%B0%9C%EC%84%A0</id><content type="html" xml:base="https://jihwankim.github.io/moigo/%EB%AA%A8%EC%9D%B4%EA%B3%A0-%ED%91%B8%EC%8B%9C-%EA%B0%9C%EC%84%A0/">&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;모이고 서버 푸시 개선에 대한 포스팅&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h1 id=&quot;작성-이유&quot;&gt;작성 이유&lt;/h1&gt;
-
-&lt;p&gt;2019년 트위니에서 회사 시무식에서 이벤트로 모이고 그룹방에서 퀴즈에 대해 정답을 입력하는 이벤트를 진행했다.&lt;br /&gt;
-해당 이벤트를 진행하던 도중 모이고 서버가 터지는 일이 발생했다. 심지어 모이고 서버는 Erlang으로 작성되어있다.&lt;br /&gt;
-왜 이런 일이 발생한건지, 원인은 무엇이고 어떻게 이것을 개선했는지에 대한 글이다.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h1 id=&quot;서버가-왜-터졌는가&quot;&gt;서버가 왜 터졌는가&lt;/h1&gt;
-
-&lt;p&gt;서버가 터졌던 이유중 하나로는 서버가 1대만 떠있었기 때문이다.&lt;br /&gt;
-서버가 1대만 떠있던 이유는 당시 모이고 DAU가 매우 적었기 때문에, 비용 절감을 위해 2대 -&amp;gt; 1대로 서버의 수를 줄여놨었다.&lt;br /&gt;
-비용절감을 위해서라지만, 1대라면, 해당 서버가 죽어버리면, 바로 장애가 일어나게 된다. 애초에 2~3대를 기본적으로 운용했어야 했는데, 해당 부분은 우리팀의 실수였다.&lt;br /&gt;
-이후, 서버는 상시 2대를 기본 운용하도록 변경하였다.&lt;br /&gt;
-만약, 2대가 있었다면, 요청분산이 어느정도 될 테니, 서버가 죽진 않았을거라 생각된다.&lt;/p&gt;
-
-&lt;p&gt;서버가 터졌던 가장 큰 이유는 모이고 서버의 푸시 전송 방식이 효율적이지 않아서였다.&lt;br /&gt;
-당시 클라이언트별로 데이터 푸시를 따로 보내고, 알람도 따로 보냈다.&lt;br /&gt;
-채팅전송시 한명의 유저에게 보내는 푸시는 AOS의 채팅데이터 푸시. IOS 채팅 데이터 푸시. IOS 노티푸시가 있다. (클라이언트 타입별로 따로 보내고 있었다.)&lt;/p&gt;
-
-&lt;p&gt;만약, 그룹으로 채팅을 보낸다면, 개개인에게 푸시를 각자 전송했었고, 만약, 10명이 있는 방이라면 채팅 1개당 전송되는 푸시의 개수는 30개가 된다.&lt;br /&gt;
-추가적으로 채팅을 읽었을때도 푸시가 있어서 이런걸 합하면, 50~60명의 유저가 채팅방에 있을 때, 일시에 채팅전송을 시작한다면, 어마어마한 양의 FCM 전송요청이 생긴다.&lt;br /&gt;
-간단하게 계산해보면, 채팅 하나당 전송되는 푸시 요청 횟수는 150회가 되는데, 연속적으로 채팅을 전송하게된다면? 생각만해도 끔찍하다.&lt;/p&gt;
-
-&lt;p&gt;요청이 있는것만으로 서버가 죽은 이유는 Erlang에 동시에 떠있는 프로세스 개수가 많아지면서 메모리를 너무 많이 잡아먹어서였다.&lt;br /&gt;
-만약, 채팅전송을 한다면, 푸시 자체는 비동기로 전송하기 때문에, 비동기 푸시를 위해 프로세스가 하나 더 뜬다. 이후, 보내야하는 유저별로 데이터 싱크를 위한 저장소에 추가적으로 데이터를 저장하게 된다. 해당 동작도 비동기로 동작한다. 즉 여기서 프로세스가 유저수만큼 뜨게 된다.&lt;br /&gt;
-이후, lhttpc library 자체적으로 프로세스를 띄워서 요청했던 것으로 기억하는데, 해당 요청수만큼 다시 프로세스가 뜨고, 추가적으로 몇개의 프로세스가 더 뜨는 것을 확인했었다.&lt;/p&gt;
-
-&lt;p&gt;실제로, 개발서버에 테스트를 해봤었을때, 특정 프로세스가 많이 떠있던것을 확인했는데, ssl 관련 프로세스였던 것으로 기억한다.&lt;/p&gt;
-
-&lt;p&gt;위 과정을 거쳐 프로세스가 비정상적으로 많이 떠있게 되며, 메모리가 가득차게 되어 서버가 죽어버렸다.&lt;/p&gt;
-
-&lt;p&gt;그렇다면 해당 푸시를 어떻게 최적화를 시켜야할까? 라는 고민은 이전부터 있었다.&lt;br /&gt;
-해당 현상에 대해 어느정도 예상했었고, 당시 사수형과 이야기해서 해당 부분에 대해 나중에 개선하자고 이야기가 되어있었다.&lt;/p&gt;
-
-&lt;p&gt;시무식 당시에 이러한 이유로 서버가 죽어버리자, 푸시 전송방식을 개선하였다.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h1 id=&quot;푸시-방식-개선-여정&quot;&gt;푸시 방식 개선 여정&lt;/h1&gt;
-
-&lt;p&gt;푸시 개선은 결과적으로 보면 아래와 같이 바뀌었다.&lt;/p&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt; &lt;/th&gt;
-      &lt;th&gt;개선이전&lt;/th&gt;
-      &lt;th&gt;개선이후&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;토픽&lt;/td&gt;
-      &lt;td&gt;유저토픽&lt;/td&gt;
-      &lt;td&gt;유저토픽 + 그룹토픽 (그룹단위 토픽)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;푸시방식&lt;/td&gt;
-      &lt;td&gt;모든 유저에게 각자의 토픽에 대해 푸시&lt;/td&gt;
-      &lt;td&gt;유저 대상으로는 이전과 동일한 방식으로 푸시. 하지만, 그룹이 대상이라면, 그룹 토픽으로 푸시&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;개선 이전 방법에서 개선 이후 방식으로 곧바로 넘어가게 되면 업데이트되지 않은 클라이언트들이 정상동작하지 않게 될것이고, 그렇다고 그대로 두면 서버가 또 터지는 일이 발생할테니, 양쪽을 모두 사용할 수 있는 방식으로 개선되었다.&lt;/p&gt;
-
-&lt;p&gt;일단, 푸시 데이터 종류에 따라, 우선순위를 지정을 하고, 우선순위에 따라 높은 우선순위의 아이템부터 유저에게 푸시하였다.&lt;br /&gt;
-각 우선순위에 따라, AWS SQS에 push하고, 우선순위가 높은 큐에서부터 pull을 하여 우선 푸시하는 방법을 사용하였다.&lt;br /&gt;
-우선순위가 높은 것들에는 채팅, 그룹원변경 등이 었었고, 낮은 운선순위의 것들은 채팅읽음 동기화 푸시 등이 있다.&lt;/p&gt;
-
-&lt;p&gt;그리고 여러개의 토픽에 대해서 묶어서 한번에 푸시할 수 있도록 FCM 요청도 개선되었다.&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  ( ex condition : ~~ in topics || ~~ in topics)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;해당 작업을 하고 난 이후에는 동일한 이유로 서버가 터지는 일은 없었다.&lt;/p&gt;
-
-&lt;p&gt;이후, 클라이언트가 업데이트를 어느정도 하였고, 개선버전 푸시 시스템으로 넘어가도 문제가 없는 시기가 되었다.&lt;/p&gt;
-
-&lt;hr /&gt;
-&lt;h2 id=&quot;푸시-개선-적용&quot;&gt;푸시 개선 적용&lt;/h2&gt;
-
-&lt;p&gt;실제로 개선버전 푸시 방식을 적용하기 전, 클라이언트에 알람을 보내는 부분에서 문제가 발생하였다.&lt;br /&gt;
-IOS의 경우, 백그라운드 동작을 할 수가 없어서 알람을 서버에서 직접 쏘는데, 유저 설정에 따라 알람을 받지 않기도 하고, 친구의 이름 설정에 따라, 알람이 다르게 와야 한다.&lt;br /&gt;
-하지만, 코드 상에서는 대상 토픽을 대상으로 알람을 쏘고 있었기 때문에, 알람이 원하던 것과 다르게 전송되고 있었다.&lt;br /&gt;
-따라서, 유저별로 알람을 따로 보내게끔 추가로 개선해야 했었다.&lt;/p&gt;
-
-&lt;p&gt;해당 부분에 대해 어떻게 해결할까 고민하며 서칭하던 중에 FCM 기능중 Multicast기능이 있고, 해당 기능이 알람을 보낼때 아주 적합하다고 생각했다.&lt;/p&gt;
-
-&lt;p&gt;그룹 알람의 경우, 알람을 꺼놓지 않은 유저들에 대한 정보만 가져와서 해당 유저들에게만 Notification을 푸시하도록 수정하였다.&lt;br /&gt;
-개인 대상으로 전송해야 할 때는 차이가 없었지만, 그룹에서 여러명의 유저에게 한번에 묶어서 보낸다는 것은 대단히 큰 이점이라고 생각한다.&lt;br /&gt;
-Notification에는 Multicast기능을 이용하여 푸시하도록 개선하였다.&lt;/p&gt;
-
-&lt;p&gt;또, 각 클라이언트 타입별로 메세지를 따로 보내고 있었는데, 현재 모이고에서 사용되고 있는 메세지 body는 IOS/ANDROID를 따로 보낼 필요가 없어서 하나로 통합하여 보내도록 개선하였다.&lt;/p&gt;
-
-&lt;p&gt;개선이 모두 이루어 지고 나서, 너무나도 느렸던 모이고의 푸시 속도는 놀라울 정도로 개선되었다.&lt;/p&gt;
-
-&lt;p&gt;많은 부분이 좋아지고 있지만, 갈길은 여전히 멀다.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;추가적으로 해당 작업도중 HTTP v1이 출시된 것을 알고 버전을 올리려고 했으나, 버그가 발생하여 올리지 못했다. 해당 부분에 대해서는 추후에 따로 포스팅해볼 예정이다.&lt;/p&gt;</content><author><name>Jihwan Kim</name><email>jihwan.dev@gmail.com</email></author><category term="MoiGo" /><summary type="html">모이고 서버 푸시 개선에 대한 포스팅</summary></entry></feed>
+만약, Google에서 인증 서버에 문제가 생겨서 AccessToken을 재발급받지 못하면, 장애가 난 시간만큼 클라이언트에 푸시가 전송되지 않게 된다.</p>
+
+<h1 id="5-http-api에서-aosios-푸시는-함께--따로-">5. HTTP API에서 AOS/IOS 푸시는 함께 ? 따로 ?</h1>
+<p>과거에는 서비스의 서버에서 AOS/IOS에 대해 푸시를 따로 전송하였다.<br />
+그렇게 전송하는 이유는 이미 서비스 서버를 본격적으로 개발하기 시작했을 때는 이미 그런 상황이라 잘 모른다.<br />
+하지만, 위 4번에 해당하는 작업을 못하게 되면서, 그냥 IOS/AOS에 대해 같은데이터를 넣고 한번에 푸시를 보내니, 둘 모두 데이터를 정상적으로 수신하였다.<br />
+물론, 각각(AOS/IOS)의 동일한 키값에 대해 서로 다르게 받고 있는 데이터를 사용하고 있다면, 따로 전송하는 것이 맞겠지만, 개발하던 서비스에서는 그렇지 않기 때문에, 문제가 없다 판단되었다.<br />
+만약, 동일한 키값에 대해 서로 다르게 받아야 한다고 하면, 그때가서 개선하면 될 문제라고 생각한다.</p>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="Develop" /><category term="FCM" /><summary type="html"><![CDATA[FCM을 사용하면서 겪은 문제와 문제를 해결했던 방법.]]></summary></entry><entry><title type="html">Redis 장애</title><link href="http://localhost:4000/moigo/Redis-%EC%9E%A5%EC%95%A0/" rel="alternate" type="text/html" title="Redis 장애" /><published>2021-04-18T00:00:00+09:00</published><updated>2021-04-17T22:06:00+09:00</updated><id>http://localhost:4000/moigo/Redis-%EC%9E%A5%EC%95%A0</id><content type="html" xml:base="http://localhost:4000/moigo/Redis-%EC%9E%A5%EC%95%A0/"><![CDATA[<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Redis 장애 대응</span>
+</code></pre></div></div>
+
+<p>14일 오후 2시 36분 ~ 38분 사이에 서버에 장애가 발생했다.<br />
+장애 포인트는 AWS Elasticache Redis였고, 36분부터 문제가 생겨 38분에 복구되었다.<br />
+장애가 발생한 이유는 무엇이고, 어떻게 개선할 것인지에 대해 생각했던 것을 기록하는 글이다.</p>
+
+<h1 id="장애가-2분이나-유지된-이유">장애가 2분이나 유지된 이유</h1>
+<p>Redis 서비스에서 Primary 1대 Replica 1대를 사용하고 있는데, FailOver 설정을 해두지 않아서, Replica가 자동으로 Primary로 승격되지 않아 장애가 유지되었다. 즉, 장애 복구시간동안, Redis에 대한 요청이 모두 실패하여, 엮여있는 부분에서 장애가 발생하였다.</p>
+
+<h1 id="장애-발생에-따라-문제가-된-부분">장애 발생에 따라 문제가 된 부분</h1>
+<p>서버에서 세션정보를 저장하는 DB로 Redis를 사용하고 있는데, 유저가 API를 요청하면, 해당 세션이 유효한지 여부를 검증할 수 없는 문제가 발생하였다.</p>
+
+<h1 id="추후-장애-발생을-방지하기-위해-어떻게-개선할-것인가">추후, 장애 발생을 방지하기 위해 어떻게 개선할 것인가</h1>
+<ol>
+  <li>Redis FailOver: true 설정 ( 기존에는 false로 설정되어있었음. )</li>
+  <li>Redis Version 5.0.4 -&gt; 5.0.6 으로 업그레이드</li>
+  <li>MultiAZ 설정 ( 기존에는 false로 설정되어 있었음. )</li>
+</ol>
+
+<h1 id="추가적인-개선">추가적인 개선</h1>
+<ol>
+  <li>Redis의 Read Replica에 대해서 요청하지 않고 있는데, 읽을 때, Read Replica의 EndPoint로 요청하도록 개선</li>
+</ol>
+
+<h1 id="개선-근거">개선 근거</h1>
+<h2 id="redis-failover-true-설정">Redis FailOver true 설정</h2>
+<p>해당 설정이 되어 있었으면, replica가 자동으로 primary로 승격되어 장애 시간이 2분이나 되지 않았을 것이다. 하지만, false로 되어 있었기 때문에, primary가 복구될 때 까지 계속 장애가 유지되었다.</p>
+
+<h2 id="redis-version-504---506-으로-업그레이드">Redis Version 5.0.4 -&gt; 5.0.6 으로 업그레이드</h2>
+<p>아래의 문서를 근거로 버전을 업그레이드 할 예정이다.<br />
+만약, 문제가 생겨서 Replica가 Primary로 승격된다고 할 때, 읽기 쓰기 모두 장애는 발생하지 않는 방법이 있다면 해당 방법을 사용하는 것이 맞다 생각한다.</p>
+
+<p><strong>AWS 문서 발취</strong></p>
+<blockquote>
+  <p>ElastiCache for Redis 클러스터의 경우, 클러스터에서 들어오는 쓰기 요청을 처리하는 중에 계획된 노드 교체가 완료됩니다.</p>
+</blockquote>
+
+<blockquote>
+  <p>다중 AZ가 활성화되어 5.0.5 이상 엔진에서 실행 중인 Redis 클러스터 모드 비활성화 클러스터의 경우, 클러스터에서 들어오는 쓰기 요청을 처리하는 중에 계획된 노드 교체가 완료됩니다.</p>
+</blockquote>
+
+<blockquote>
+  <p>다중 AZ가 활성화되어 5.0.4 이하 엔진에서 실행 중인 Redis Cluster 모드 비활성화 클러스터의 경우, DNS 업데이트와 관련하여 짧은 쓰기 중단이 발생할 수 있습니다. 이 중단은 최대 몇 초가 걸릴 수 있습니다. 이 프로세스는 다중 AZ를 활성화하지 않은 경우 발생하는 새 기본 노드를 다시 생성하고 프로비저닝하는 것보다 훨씬 빠릅니다.</p>
+</blockquote>
+
+<p>이후, 업데이트 내역을 살펴보니, 바로 올려도 문제는 없을것 같긴 한데, 테스트정도는 해보는게 맞다고 생각한다.<br />
+따라서, 개발서버용 Redis를 미리 5.0.6 으로 올려서 테스트 해보고 업데이트할 예정이다.</p>
+
+<h2 id="multiaz-설정">MultiAZ 설정</h2>
+<p>만약, 특정 리전에서 장애가 발생할 경우, 해당 리전에 primary와 replica가 함께 떠있다면, 그것은 곧 장애로 이어진다.<br />
+설정을 true로 변경하게 되면, 두개 이상의 리전에서 동시에 문제가 발생하지 않는다면, 서비스는 문제없이 유지될 것이다.</p>
+
+<h2 id="redis-read-replica-end-point-사용">Redis Read Replica End Point 사용</h2>
+<p>해당 부분은 기존에 사용하고 있지 않아서, 사용하려고 한다.<br />
+코드 상에서 Read라면, Read EndPoint로 요청할 것이고, Write라면, Primary EndPoint에 요청하게끔 개선할 예정이다.</p>
+
+<h3 id="참고링크">참고링크</h3>
+<p><a href="https://docs.aws.amazon.com/ko_kr/AmazonElastiCache/latest/red-ug/AutoFailover.html#auto-failover-test">AWS - FailOver</a><br />
+<a href="https://docs.aws.amazon.com/ko_kr/AmazonElastiCache/latest/red-ug/Endpoints.html">AWS - EndPoints</a><br />
+<a href="https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/BestPractices.html">AWS - BestPractice</a></p>]]></content><author><name>paca94</name><email>jihwan.dev@gmail.com</email></author><category term="MoiGo" /><category term="MoiGo, Erlang, AWS, Redis" /><summary type="html"><![CDATA[Redis 장애 대응]]></summary></entry></feed>
