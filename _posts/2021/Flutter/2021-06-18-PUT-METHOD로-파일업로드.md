@@ -11,7 +11,8 @@ comments: true
 share: true
 related: true
 tag:
-- Flutter, AWS
+- Flutter
+- AWS
 description: Put Method를 통한 파일 업로드
 article_tag1: Flutter
 article_section: Flutter
@@ -26,7 +27,7 @@ popular: true
 Put Method를 통한 파일 업로드
 ```
 
-Flutter 작업도중, 서버단에서 S3에 파일을 업로드를 할 때, SignedURL로 직접 올리도록 구현해놔서, PUT METHOD로 파일을 직접 올려야 할 일이 있었다.  
+Flutter 작업도중, 서버단에서 S3에 파일을 업로드를 할 때, SignedURL로 직접 올리도록 구현해놔서, PUT METHOD로 파일을 직접 올려야 할 일이 있었다.
 하지만, 찾아보니, 대부분 Multipart로 업로드하는 방법에 대해서만 기술해놔서, 해당 코드를 블로그에 기록한다.
 
 ```Dart

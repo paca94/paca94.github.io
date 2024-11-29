@@ -11,11 +11,11 @@ comments: true
 share: true
 related: true
 tag:
-  - mysql
+  - MySQL
 description: Charset 불일치로 인한 풀스캔 수정기
-article_tag1: mysql
-article_section: mysql
-meta_keywords: mysql
+article_tag1: MySQL
+article_section: MySQL
+meta_keywords: MySQL
 toc: true
 toc_sticky: true
 toc_label: 목차
@@ -28,11 +28,11 @@ popular: true
 
 # 문제 발견
 
-1. AWS slowQuery 로그 상에 특정 쿼리가 오래 걸리는 것을 발견함.  
+1. AWS slowQuery 로그 상에 특정 쿼리가 오래 걸리는 것을 발견함.
 
 # 원인 분석
 
-1. 해당 쿼리문과 테이블을 살펴보면, 풀스캔을 하지 않도록 정상적으로 인덱스가 걸려있고, 해당 인덱스를 조건으로 사용하고 있음.  
+1. 해당 쿼리문과 테이블을 살펴보면, 풀스캔을 하지 않도록 정상적으로 인덱스가 걸려있고, 해당 인덱스를 조건으로 사용하고 있음.
 1. Expain 해본 결과, 아래와 같이 조건 비교시, 다른 charset으로 convert하고 있음.
     ![image](/assets/image/slow_query/convert.png)
 1. 따라서, 아래 쿼리문을 통해 charset값이 utf8mb4가 아닌것들을 조회함.

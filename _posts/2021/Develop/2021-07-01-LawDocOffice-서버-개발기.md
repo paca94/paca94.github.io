@@ -11,11 +11,11 @@ comments: true
 share: true
 related: true
 tag:
-  - ts
+  - TypeScript
 description: LawDocOffice Server 개발기(토이, ts)
-article_tag1: ts
-article_section: ts
-meta_keywords: ts
+article_tag1: TypeScript
+article_section: TypeScript
+meta_keywords: TypeScript
 toc: true
 toc_sticky: true
 toc_label: 목차

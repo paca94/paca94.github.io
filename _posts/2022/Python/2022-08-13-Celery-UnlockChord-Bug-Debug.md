@@ -11,7 +11,8 @@ comments: true
 share: true
 related: true
 tag:
-- Python, Celery
+- Python
+- Celery
 description: Celery 5.2.7에서 db를 redis가 아닌 것을 사용할 경우, unlock_chord 에러가 무한루프로 발생하는 버그 디버그
 article_tag1: Python
 article_section: Python

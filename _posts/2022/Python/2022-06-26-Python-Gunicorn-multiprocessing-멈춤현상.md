@@ -11,7 +11,9 @@ comments: true
 share: true
 related: true
 tag:
-- Python, Djnago, Gunicorn
+- Python
+- Djnago
+- Gunicorn
 description: gunicorn으로 django 실행시, multiprocessing 사용해서 만든 sub process에서 에러 발생시, sub 프로세스가 멈추는 현상.
 article_tag1: Python
 article_section: Python
@@ -34,7 +36,7 @@ gunicorn 20.x
 ```
 
 # 현상
-gunicorn worker에서 만든 sub process에서 http 요청이 섞여있는 함수를 실행하다가 익셉션 발생시, 만들어진 sub process가 멈춤.  
+gunicorn worker에서 만든 sub process에서 http 요청이 섞여있는 함수를 실행하다가 익셉션 발생시, 만들어진 sub process가 멈춤.
 정확히는 Pool에 들어간 작업이 모두 끝나서 pool.terminate() 동작에 들어갔으나, sub process(os.waitpid로 무한정 대기)가 종료되질 않아서 무한정 대기함.
 
 
@@ -42,8 +44,8 @@ gunicorn worker에서 만든 sub process에서 http 요청이 섞여있는 함�
 sub process에서 `exception.__traceback__`이 반환된다면, 항상 발생한다. ( raise, return 모두 동일함 )
 
 # 해결
-sub process에서 try catch로 내부의 모든 익셉션을 잡은 뒤, 해당 익셉션에 대해 Wrapping 클래스를 만들어서 해당 정보를 넣어준 뒤, return 하도록 함.  
-그리고 `exception.__traceback__`에 대해서는 문자열로 변경하여 반환함.  
+sub process에서 try catch로 내부의 모든 익셉션을 잡은 뒤, 해당 익셉션에 대해 Wrapping 클래스를 만들어서 해당 정보를 넣어준 뒤, return 하도록 함.
+그리고 `exception.__traceback__`에 대해서는 문자열로 변경하여 반환함.
 그 뒤, pool쪽에서 반환된 인스턴스의 타입을 체크하여, 에러인 것이 왔으면, worker process에서 raise하도록 처리함.
 
 example)
@@ -66,7 +68,7 @@ def mp_function_wrapper(function, args):
 ```
 
 # 추가 확인
-이후, 별도로 확인해본 결과, Python3.6 Python3.7에서 발생함  
+이후, 별도로 확인해본 결과, Python3.6 Python3.7에서 발생함
 둘 모두 지원 종료된 버전이므로 별도로 Gunicorn소스 까보며 확인하진 않음.
 
 
