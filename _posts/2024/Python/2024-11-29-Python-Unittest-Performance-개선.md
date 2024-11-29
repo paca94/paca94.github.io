@@ -11,7 +11,8 @@ comments: true
 share: true
 related: true
 tag:
-- Python, Unittest
+- Python
+- Unittest
 description: Pycharm Profile 기능을 활용하여, 유닛테스트 속도 개선
 article_tag1: Python
 article_section: Python
